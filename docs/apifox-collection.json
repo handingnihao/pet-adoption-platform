@@ -1,0 +1,59 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "宠物领养平台API",
+    "version": "1.0.0",
+    "description": "宠物领养平台后端API接口文档\n\n测试账号：\n- 管理员: admin / Test@123456\n- 普通用户: testuser1 / Test@123456"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080",
+      "description": "本地开发环境"
+    },
+    {
+      "url": "http://115.190.125.177:8080",
+      "description": "测试服务器"
+    }
+  ],
+  "tags": [
+    {"name": "系统", "description": "系统健康检查"},
+    {"name": "用户认证", "description": "用户登录、注册"},
+    {"name": "用户信息", "description": "个人信息管理"},
+    {"name": "用户管理", "description": "管理员功能"}
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "Response": {
+        "type": "object",
+        "properties": {
+          "code": {"type": "integer", "example": 200},
+          "message": {"type": "string", "example": "success"},
+          "data": {"type": "object"},
+          "timestamp": {"type": "integer", "example": 1765184000}
+        }
+      },
+      "UserInfo": {
+        "type": "object",
+        "properties": {
+          "id": {"type": "integer"},
+          "username": {"type": "string"},
+          "nickname": {"type": "string"},
+          "real_name": {"type": "string"},
+          "phone": {"type": "string"},
+          "email": {"type": "string"},
+          "gender": {"type": "integer"},
+          "role": {"type": "string", "enum": ["user", "organization", "admin"]},
+          "status": {"type": "integer"}
+        }
+      }
+    }
+  },
+  "paths": {}
+}

@@ -1,0 +1,62 @@
+version: '3.8'
+
+services:
+  # MySQL 数据库
+  mysql:
+    image: mysql:8.0
+    container_name: pet-adoption-mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: 123456
+      MYSQL_DATABASE: pet_adoption
+      MYSQL_USER: pet_user
+      MYSQL_PASSWORD: pet_pass
+      TZ: Asia/Shanghai
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    command: --default-authentication-plugin=mysql_native_password --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    networks:
+      - pet-network
+
+  # Redis 缓存
+  redis:
+    image: redis:7-alpine
+    container_name: pet-adoption-redis
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    networks:
+      - pet-network
+
+  # 应用服务
+  app:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: pet-adoption-app
+    restart: always
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mysql
+      - redis
+    environment:
+      - GIN_MODE=release
+    volumes:
+      - ../logs:/root/logs
+    networks:
+      - pet-network
+
+volumes:
+  mysql_data:
+  redis_data:
+
+networks:
+  pet-network:
+    driver: bridge
