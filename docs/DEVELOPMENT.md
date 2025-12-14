@@ -1,88 +1,63 @@
 # 开发指南
 
-## 核心框架已完成 ✅
+## 项目进度 ✅
 
-### 已实现的功能
+### 已完成的模块
 
-#### 1. 项目架构 ✅
-- [x] Go 单体分层架构
+#### 1. 基础架构 ✅
+- [x] Go 单体分层架构 (Controller → Service → DAO → Model)
 - [x] 标准项目目录结构
-- [x] 模块化设计
+- [x] 配置管理 (Viper + YAML)
+- [x] 数据库 (GORM + MySQL)
+- [x] 缓存 (Redis)
+- [x] 日志系统 (Zap)
+- [x] 统一响应格式
+- [x] JWT认证
+- [x] 中间件 (CORS、日志、限流、认证、权限)
+- [x] Docker支持
 
-#### 2. 核心组件 ✅
+#### 2. 用户模块 ✅ (`internal/*/user*`)
+- [x] 用户注册/登录
+- [x] 获取/更新个人信息
+- [x] 修改密码
+- [x] 用户列表（管理员）
+- [x] 用户搜索（管理员）
+- [x] 禁用/启用用户（管理员）
 
-**配置管理** (`config/`)
-- [x] YAML 配置文件支持
-- [x] Viper 配置加载
-- [x] 多环境配置
-- [x] 配置结构化定义
+#### 3. 宠物模块 ✅ (`internal/*/pet*`)
+- [x] 宠物发布
+- [x] 宠物列表/详情
+- [x] 宠物搜索/条件查询
+- [x] 推荐宠物
+- [x] 我的宠物
+- [x] 更新/删除/下架宠物
+- [x] 宠物审核（管理员）
+- [x] 宠物统计（管理员）
 
-**数据库** (`pkg/database/`)
-- [x] MySQL 连接池
-- [x] GORM ORM 集成
-- [x] 连接参数配置
-- [x] 自动重连
+#### 4. 领养模块 ✅ (`internal/*/adoption*`)
+- [x] 提交领养申请
+- [x] 我的申请列表
+- [x] 申请详情/更新/取消
+- [x] 我的领养记录
+- [x] 申请审核（管理员）
+- [x] 领养记录管理（管理员）
+- [x] 领养统计（管理员）
 
-**缓存** (`pkg/cache/`)
-- [x] Redis 客户端
-- [x] 连接池管理
-- [x] 常用缓存操作封装
-- [x] 自动过期管理
+#### 5. 机构模块 ✅ (`internal/*/organization*`)
+- [x] 机构入驻申请
+- [x] 机构列表/详情
+- [x] 我的机构
+- [x] 更新/删除机构
+- [x] 机构审核（管理员）
 
-**日志系统** (`pkg/logger/`)
-- [x] Zap 日志框架
-- [x] 日志分级（Debug/Info/Warn/Error）
-- [x] 日志文件切割
-- [x] 控制台 + 文件双输出
+### 待开发的模块 📋
 
-**统一响应** (`pkg/response/`)
-- [x] 标准 JSON 响应格式
-- [x] 错误码定义
-- [x] 分页数据结构
-- [x] 常用响应方法
-
-**工具函数** (`pkg/utils/`)
-- [x] JWT Token 生成与解析
-- [x] BCrypt 密码加密
-- [x] 随机字符串生成
-- [x] 时间格式化
-
-#### 3. 中间件 ✅
-
-**CORS 中间件** (`middleware/cors.go`)
-- [x] 跨域请求支持
-- [x] OPTIONS 预检处理
-
-**日志中间件** (`middleware/logger.go`)
-- [x] HTTP 请求日志记录
-- [x] 响应时间统计
-- [x] 错误日志追踪
-
-**认证中间件** (`middleware/auth.go`)
-- [x] JWT 认证
-- [x] 用户信息注入
-- [x] 管理员权限验证
-- [x] 机构权限验证
-
-**限流中间件** (`middleware/rate_limit.go`)
-- [x] IP 维度限流
-- [x] 用户维度限流
-- [x] 令牌桶算法
-- [x] 自动清理机制
-
-#### 4. 路由系统 ✅
-
-**路由配置** (`internal/router/`)
-- [x] Gin 路由集成
-- [x] 路由分组
-- [x] API 版本控制 (v1)
-- [x] 健康检查接口
-- [x] 路由骨架（待实现控制器）
-
-#### 5. Docker 支持 ✅
-- [x] Dockerfile 多阶段构建
-- [x] Docker Compose 编排
-- [x] MySQL + Redis + App 容器化
+- [ ] 社区功能（动态、评论、点赞）
+- [ ] 捐赠系统
+- [ ] 回访系统
+- [ ] 消息通知
+- [ ] 文件上传（OSS）
+- [ ] 数据统计仪表盘
 
 ## 开发环境配置
 
@@ -157,47 +132,7 @@ curl http://localhost:8080/health
 curl http://localhost:8080/api/v1/ping
 ```
 
-## 下一步开发任务
-
-### Week 5-6: 用户模块开发
-
-#### 后端任务
-1. **创建用户模型** (`internal/model/user.go`)
-   - 定义 User 结构体
-   - GORM 标签配置
-   - 表关联关系
-
-2. **用户 DAO 层** (`internal/dao/user_dao.go`)
-   - CreateUser: 创建用户
-   - GetUserByID: 根据 ID 查询
-   - GetUserByPhone: 根据手机号查询
-   - GetUserByEmail: 根据邮箱查询
-   - UpdateUser: 更新用户信息
-
-3. **用户 Service 层** (`internal/service/user_service.go`)
-   - Register: 用户注册逻辑
-   - Login: 用户登录逻辑
-   - GetProfile: 获取个人信息
-   - UpdateProfile: 更新个人信息
-   - UploadAvatar: 上传头像
-
-4. **用户 Controller** (`internal/controller/user_controller.go`)
-   - RegisterHandler: 注册接口
-   - LoginHandler: 登录接口
-   - GetProfileHandler: 获取信息接口
-   - UpdateProfileHandler: 更新信息接口
-   - UploadAvatarHandler: 上传头像接口
-
-5. **注册路由**
-   - 在 `router.go` 中取消注释用户路由
-   - 绑定控制器方法
-
-#### 前端任务（另一个分支）
-- 注册页面
-- 登录页面
-- 个人中心页面
-
-### 开发工作流
+## 开发工作流
 
 ```bash
 # 1. 创建功能分支
@@ -382,9 +317,9 @@ taskkill /PID <进程ID> /F
 - [Gin 框架文档](https://gin-gonic.com/docs/)
 - [GORM 文档](https://gorm.io/docs/)
 - [Redis 文档](https://redis.io/docs/)
-- [项目设计文档](../爱心宠物领养平台设计方案.md)
+- [API文档](./API文档.md)
 
 ---
 
-**最后更新**: 2024-12-08  
-**当前进度**: Week 1-4 核心框架搭建 ✅
+**最后更新**: 2025-12-14  
+**当前进度**: 核心模块开发完成 ✅

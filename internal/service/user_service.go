@@ -16,14 +16,13 @@ import (
 )
 
 var (
-	ErrUserExists         = errors.New("用户已存在")
-	ErrUserNotFound       = errors.New("用户不存在")
-	ErrInvalidPassword    = errors.New("密码错误")
-	ErrUserDisabled       = errors.New("用户已被禁用")
-	ErrInvalidCode        = errors.New("验证码错误或已过期")
-	ErrPhoneExists        = errors.New("手机号已被注册")
-	ErrEmailExists        = errors.New("邮箱已被注册")
-	ErrOldPasswordWrong   = errors.New("原密码错误")
+	ErrUserExists       = errors.New("用户已存在")
+	ErrUserNotFound     = errors.New("用户不存在")
+	ErrInvalidPassword  = errors.New("密码错误")
+	ErrUserDisabled     = errors.New("用户已被禁用")
+	ErrPhoneExists      = errors.New("手机号已被注册")
+	ErrEmailExists      = errors.New("邮箱已被注册")
+	ErrOldPasswordWrong = errors.New("原密码错误")
 )
 
 // UserService 用户服务
@@ -42,9 +41,7 @@ func NewUserService(db *gorm.DB, rdb *redis.Client) *UserService {
 
 // Register 用户注册
 func (s *UserService) Register(req *model.UserRegisterRequest) (*model.User, error) {
-	ctx := context.Background()
-
-	// 2. 检查用户名是否存在
+	// 检查用户名是否存在
 	exists, err := s.userDAO.ExistsByUsername(req.Username)
 	if err != nil {
 		logger.Error("检查用户名失败", zap.Error(err))
