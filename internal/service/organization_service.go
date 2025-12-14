@@ -8,6 +8,7 @@ import (
 	"pet-adoption-platform/pkg/logger"
 
 	"go.uber.org/zap"
+	"gorm.io/gorm"
 )
 
 // OrganizationService 机构服务
@@ -23,7 +24,7 @@ func NewOrganizationService(db *gorm.DB) *OrganizationService {
 }
 
 // CreateOrganization 创建机构
-func (s *OrganizationService) CreateOrganization(ctx context.Context, req *model.OrganizationCreateRequest, userID int64) (*model.Organization, error) {
+func (s *OrganizationService) CreateOrganization(ctx context.Context, req *model.OrganizationCreateRequest, userID uint64) (*model.Organization, error) {
 	// 检查机构名称是否已存在
 	exists, err := s.orgDAO.CheckNameExists(ctx, req.Name)
 	if err != nil {
@@ -55,7 +56,7 @@ func (s *OrganizationService) CreateOrganization(ctx context.Context, req *model
 }
 
 // UpdateOrganization 更新机构信息
-func (s *OrganizationService) UpdateOrganization(ctx context.Context, id int64, req *model.OrganizationUpdateRequest, userID int64) error {
+func (s *OrganizationService) UpdateOrganization(ctx context.Context, id uint64, req *model.OrganizationUpdateRequest, userID uint64) error {
 	// 检查机构是否存在
 	org, err := s.orgDAO.GetByID(ctx, id)
 	if err != nil {
@@ -104,7 +105,7 @@ func (s *OrganizationService) UpdateOrganization(ctx context.Context, id int64, 
 }
 
 // GetOrganization 获取机构详情
-func (s *OrganizationService) GetOrganization(ctx context.Context, id int64) (*model.Organization, error) {
+func (s *OrganizationService) GetOrganization(ctx context.Context, id uint64) (*model.Organization, error) {
 	return s.orgDAO.GetByID(ctx, id)
 }
 
@@ -121,7 +122,7 @@ func (s *OrganizationService) ListOrganizations(ctx context.Context, page, pageS
 }
 
 // DeleteOrganization 删除机构
-func (s *OrganizationService) DeleteOrganization(ctx context.Context, id int64) error {
+func (s *OrganizationService) DeleteOrganization(ctx context.Context, id uint64) error {
 	// 检查机构是否存在
 	org, err := s.orgDAO.GetByID(ctx, id)
 	if err != nil {
@@ -135,7 +136,7 @@ func (s *OrganizationService) DeleteOrganization(ctx context.Context, id int64) 
 }
 
 // UpdateOrganizationStatus 更新机构状态
-func (s *OrganizationService) UpdateOrganizationStatus(ctx context.Context, id int64, req *model.OrganizationStatusUpdateRequest, userID int64) error {
+func (s *OrganizationService) UpdateOrganizationStatus(ctx context.Context, id uint64, req *model.OrganizationStatusUpdateRequest, userID uint64) error {
 	// 检查机构是否存在
 	org, err := s.orgDAO.GetByID(ctx, id)
 	if err != nil {
@@ -160,7 +161,7 @@ func (s *OrganizationService) UpdateOrganizationStatus(ctx context.Context, id i
 }
 
 // GetUserOrganizations 获取用户创建的机构列表
-func (s *OrganizationService) GetUserOrganizations(ctx context.Context, userID int64, page, pageSize int) ([]*model.Organization, int64, error) {
+func (s *OrganizationService) GetUserOrganizations(ctx context.Context, userID uint64, page, pageSize int) ([]*model.Organization, int64, error) {
 	if userID <= 0 {
 		return nil, 0, errors.New("invalid user id")
 	}
@@ -173,34 +174,4 @@ func (s *OrganizationService) GetUserOrganizations(ctx context.Context, userID i
 	}
 
 	return s.orgDAO.ListByUserID(ctx, userID, page, pageSize)
-}
-
-// Add this method to organization_dao.go
-// ListByUserID 获取用户创建的机构列表
-func (dao *OrganizationDAO) ListByUserID(ctx context.Context, userID int64, page, pageSize int) ([]*model.Organization, int64, error) {
-	var (
-		orgs  []*model.Organization
-		total int64
-	)
-
-	// 计算总数
-	if err := dao.db.WithContext(ctx).Model(&model.Organization{}).
-		Where("created_by = ?", userID).
-		Count(&total).Error; err != nil {
-		logger.Error("获取用户机构总数失败", zap.Error(err), zap.Int64("user_id", userID))
-		return nil, 0, err
-	}
-
-	// 分页查询
-	offset := (page - 1) * pageSize
-	if err := dao.db.WithContext(ctx).
-		Where("created_by = ?", userID).
-		Offset(offset).Limit(pageSize).
-		Order("created_at DESC").
-		Find(&orgs).Error; err != nil {
-		logger.Error("获取用户机构列表失败", zap.Error(err), zap.Int64("user_id", userID))
-		return nil, 0, err
-	}
-
-	return orgs, total, nil
 }

@@ -18,7 +18,7 @@ const (
 
 // Organization 机构模型
 type Organization struct {
-	ID          int64             `json:"id" gorm:"primaryKey;autoIncrement;comment:机构ID"`
+	ID          uint64            `json:"id" gorm:"primaryKey;autoIncrement;comment:机构ID"`
 	Name        string            `json:"name" gorm:"size:100;not null;comment:机构名称"`
 	Logo        string            `json:"logo" gorm:"size:255;comment:机构logo"`
 	Description string            `json:"description" gorm:"type:text;comment:机构描述"`
@@ -27,8 +27,8 @@ type Organization struct {
 	Email       string            `json:"email" gorm:"size:100;comment:联系邮箱"`
 	Status      OrganizationStatus `json:"status" gorm:"default:0;comment:状态(0:待审核 1:已通过 2:已拒绝)"`
 	RejectReason string           `json:"reject_reason" gorm:"size:255;comment:拒绝原因"`
-	CreatedBy   int64             `json:"created_by" gorm:"not null;comment:创建人ID"`
-	UpdatedBy   int64             `json:"updated_by" gorm:"comment:更新人ID"`
+	CreatedBy   uint64            `json:"created_by" gorm:"not null;comment:创建人ID"`
+	UpdatedBy   uint64            `json:"updated_by" gorm:"comment:更新人ID"`
 	CreatedAt   time.Time         `json:"created_at" gorm:"autoCreateTime;comment:创建时间"`
 	UpdatedAt   time.Time         `json:"updated_at" gorm:"autoUpdateTime;comment:更新时间"`
 	DeletedAt   *time.Time        `json:"deleted_at" gorm:"index;comment:删除时间"`
@@ -67,7 +67,7 @@ type OrganizationStatusUpdateRequest struct {
 
 // OrganizationInfo 机构信息
 type OrganizationInfo struct {
-	ID          int64             `json:"id"`
+	ID          uint64            `json:"id"`
 	Name        string            `json:"name"`
 	Logo        string            `json:"logo"`
 	Description string            `json:"description"`

@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"net/http"
 	"pet-adoption-platform/internal/model"
 	"pet-adoption-platform/internal/service"
 	"pet-adoption-platform/pkg/logger"
@@ -51,7 +50,7 @@ func (ctrl *OrganizationController) CreateOrganization(c *gin.Context) {
 	}
 
 	// 创建机构
-	org, err := ctrl.orgService.CreateOrganization(c.Request.Context(), &req, userID.(int64))
+	org, err := ctrl.orgService.CreateOrganization(c.Request.Context(), &req, uint64(userID.(int64)))
 	if err != nil {
 		logger.Error("创建机构失败", zap.Error(err))
 		response.BadRequest(c, err.Error())
@@ -81,7 +80,7 @@ func (ctrl *OrganizationController) UpdateOrganization(c *gin.Context) {
 	}
 
 	// 解析机构ID
-	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
+	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
 	if err != nil {
 		response.ParamError(c, "机构ID格式错误")
 		return
@@ -96,8 +95,8 @@ func (ctrl *OrganizationController) UpdateOrganization(c *gin.Context) {
 	}
 
 	// 更新机构信息
-	if err := ctrl.orgService.UpdateOrganization(c.Request.Context(), id, &req, userID.(int64)); err != nil {
-		logger.Error("更新机构失败", zap.Error(err), zap.Int64("org_id", id))
+	if err := ctrl.orgService.UpdateOrganization(c.Request.Context(), id, &req, uint64(userID.(int64))); err != nil {
+		logger.Error("更新机构失败", zap.Error(err), zap.Uint64("org_id", id))
 		response.BadRequest(c, err.Error())
 		return
 	}
@@ -115,7 +114,7 @@ func (ctrl *OrganizationController) UpdateOrganization(c *gin.Context) {
 // @Router /api/v1/organizations/{id} [get]
 func (ctrl *OrganizationController) GetOrganization(c *gin.Context) {
 	// 解析机构ID
-	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
+	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
 	if err != nil {
 		response.ParamError(c, "机构ID格式错误")
 		return
@@ -127,7 +126,7 @@ func (ctrl *OrganizationController) GetOrganization(c *gin.Context) {
 		if err == gorm.ErrRecordNotFound {
 			response.NotFound(c, "机构不存在")
 		} else {
-			logger.Error("获取机构详情失败", zap.Error(err), zap.Int64("org_id", id))
+			logger.Error("获取机构详情失败", zap.Error(err), zap.Uint64("org_id", id))
 			response.Error(c, "获取机构详情失败")
 		}
 		return
@@ -193,7 +192,7 @@ func (ctrl *OrganizationController) ListOrganizations(c *gin.Context) {
 // @Router /api/v1/organizations/{id} [delete]
 func (ctrl *OrganizationController) DeleteOrganization(c *gin.Context) {
 	// 解析机构ID
-	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
+	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
 	if err != nil {
 		response.ParamError(c, "机构ID格式错误")
 		return
@@ -204,7 +203,7 @@ func (ctrl *OrganizationController) DeleteOrganization(c *gin.Context) {
 		if err == gorm.ErrRecordNotFound {
 			response.NotFound(c, "机构不存在")
 		} else {
-			logger.Error("删除机构失败", zap.Error(err), zap.Int64("org_id", id))
+			logger.Error("删除机构失败", zap.Error(err), zap.Uint64("org_id", id))
 			response.Error(c, "删除机构失败")
 		}
 		return
@@ -232,7 +231,7 @@ func (ctrl *OrganizationController) UpdateOrganizationStatus(c *gin.Context) {
 	}
 
 	// 解析机构ID
-	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
+	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
 	if err != nil {
 		response.ParamError(c, "机构ID格式错误")
 		return
@@ -247,11 +246,11 @@ func (ctrl *OrganizationController) UpdateOrganizationStatus(c *gin.Context) {
 	}
 
 	// 更新状态
-	if err := ctrl.orgService.UpdateOrganizationStatus(c.Request.Context(), id, &req, userID.(int64)); err != nil {
+	if err := ctrl.orgService.UpdateOrganizationStatus(c.Request.Context(), id, &req, uint64(userID.(int64))); err != nil {
 		if err == gorm.ErrRecordNotFound {
 			response.NotFound(c, "机构不存在")
 		} else {
-			logger.Error("更新机构状态失败", zap.Error(err), zap.Int64("org_id", id))
+			logger.Error("更新机构状态失败", zap.Error(err), zap.Uint64("org_id", id))
 			response.Error(c, "更新机构状态失败")
 		}
 		return
@@ -282,7 +281,7 @@ func (ctrl *OrganizationController) GetMyOrganizations(c *gin.Context) {
 	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "20"))
 
 	// 获取用户创建的机构列表
-	orgs, total, err := ctrl.orgService.GetUserOrganizations(c.Request.Context(), userID.(int64), page, pageSize)
+	orgs, total, err := ctrl.orgService.GetUserOrganizations(c.Request.Context(), uint64(userID.(int64)), page, pageSize)
 	if err != nil {
 		logger.Error("获取用户机构列表失败", zap.Error(err), zap.Int64("user_id", userID.(int64)))
 		response.Error(c, "获取机构列表失败")

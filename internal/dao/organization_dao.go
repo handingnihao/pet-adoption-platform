@@ -35,8 +35,8 @@ func (dao *OrganizationDAO) Create(ctx context.Context, org *model.Organization)
 }
 
 // Update 更新机构信息
-func (dao *OrganizationDAO) Update(ctx context.Context, id int64, updates map[string]interface{}) error {
-	if id <= 0 {
+func (dao *OrganizationDAO) Update(ctx context.Context, id uint64, updates map[string]interface{}) error {
+	if id == 0 {
 		return errors.New("invalid organization id")
 	}
 
@@ -59,8 +59,8 @@ func (dao *OrganizationDAO) Update(ctx context.Context, id int64, updates map[st
 }
 
 // GetByID 根据ID获取机构
-func (dao *OrganizationDAO) GetByID(ctx context.Context, id int64) (*model.Organization, error) {
-	if id <= 0 {
+func (dao *OrganizationDAO) GetByID(ctx context.Context, id uint64) (*model.Organization, error) {
+	if id == 0 {
 		return nil, errors.New("invalid organization id")
 	}
 
@@ -69,7 +69,7 @@ func (dao *OrganizationDAO) GetByID(ctx context.Context, id int64) (*model.Organ
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, nil
 		}
-		logger.Error("查询机构失败", zap.Error(err), zap.Int64("id", id))
+		logger.Error("查询机构失败", zap.Error(err), zap.Uint64("id", id))
 		return nil, err
 	}
 
@@ -109,14 +109,14 @@ func (dao *OrganizationDAO) List(ctx context.Context, page, pageSize int, status
 }
 
 // Delete 删除机构（软删除）
-func (dao *OrganizationDAO) Delete(ctx context.Context, id int64) error {
-	if id <= 0 {
+func (dao *OrganizationDAO) Delete(ctx context.Context, id uint64) error {
+	if id == 0 {
 		return errors.New("invalid organization id")
 	}
 
 	result := dao.db.WithContext(ctx).Delete(&model.Organization{}, id)
 	if result.Error != nil {
-		logger.Error("删除机构失败", zap.Error(result.Error), zap.Int64("id", id))
+		logger.Error("删除机构失败", zap.Error(result.Error), zap.Uint64("id", id))
 		return result.Error
 	}
 
@@ -128,8 +128,8 @@ func (dao *OrganizationDAO) Delete(ctx context.Context, id int64) error {
 }
 
 // UpdateStatus 更新机构状态
-func (dao *OrganizationDAO) UpdateStatus(ctx context.Context, id int64, status model.OrganizationStatus, rejectReason string) error {
-	if id <= 0 {
+func (dao *OrganizationDAO) UpdateStatus(ctx context.Context, id uint64, status model.OrganizationStatus, rejectReason string) error {
+	if id == 0 {
 		return errors.New("invalid organization id")
 	}
 
@@ -144,7 +144,7 @@ func (dao *OrganizationDAO) UpdateStatus(ctx context.Context, id int64, status m
 		Updates(updates)
 
 	if result.Error != nil {
-		logger.Error("更新机构状态失败", zap.Error(result.Error), zap.Int64("id", id))
+		logger.Error("更新机构状态失败", zap.Error(result.Error), zap.Uint64("id", id))
 		return result.Error
 	}
 
@@ -156,7 +156,7 @@ func (dao *OrganizationDAO) UpdateStatus(ctx context.Context, id int64, status m
 }
 
 // CheckNameExists 检查机构名称是否已存在
-func (dao *OrganizationDAO) CheckNameExists(ctx context.Context, name string, excludeID ...int64) (bool, error) {
+func (dao *OrganizationDAO) CheckNameExists(ctx context.Context, name string, excludeID ...uint64) (bool, error) {
 	if name == "" {
 		return false, errors.New("organization name is empty")
 	}
@@ -175,4 +175,33 @@ func (dao *OrganizationDAO) CheckNameExists(ctx context.Context, name string, ex
 	}
 
 	return count > 0, nil
+}
+
+// ListByUserID 获取用户创建的机构列表
+func (dao *OrganizationDAO) ListByUserID(ctx context.Context, userID uint64, page, pageSize int) ([]*model.Organization, int64, error) {
+	var (
+		orgs  []*model.Organization
+		total int64
+	)
+
+	// 计算总数
+	if err := dao.db.WithContext(ctx).Model(&model.Organization{}).
+		Where("created_by = ?", userID).
+		Count(&total).Error; err != nil {
+		logger.Error("获取用户机构总数失败", zap.Error(err), zap.Uint64("user_id", userID))
+		return nil, 0, err
+	}
+
+	// 分页查询
+	offset := (page - 1) * pageSize
+	if err := dao.db.WithContext(ctx).
+		Where("created_by = ?", userID).
+		Offset(offset).Limit(pageSize).
+		Order("created_at DESC").
+		Find(&orgs).Error; err != nil {
+		logger.Error("获取用户机构列表失败", zap.Error(err), zap.Uint64("user_id", userID))
+		return nil, 0, err
+	}
+
+	return orgs, total, nil
 }

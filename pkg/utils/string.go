@@ -1,5 +1,9 @@
 package utils
 
+import (
+	"math/rand"
+	"time"
+)
 
 const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 

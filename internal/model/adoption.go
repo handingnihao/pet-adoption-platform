@@ -129,15 +129,7 @@ func (Adoption) TableName() string {
 	return "adoptions"
 }
 
-// Organization 机构模型（临时占位，后续实现）
-type Organization struct {
-	ID   uint64 `json:"id" gorm:"primaryKey"`
-	Name string `json:"name" gorm:"size:100"`
-}
-
-func (Organization) TableName() string {
-	return "organizations"
-}
+// Organization 定义在 organization.go 中
 
 // ========== 请求和响应结构 ==========
 
