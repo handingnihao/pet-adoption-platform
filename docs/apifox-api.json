@@ -425,6 +425,188 @@
           "系统"
         ]
       }
+    },
+    "/api/v1/community/posts": {
+      "get": {
+        "summary": "获取动态列表",
+        "description": "获取社区动态列表（支持分页和类型筛选）",
+        "tags": ["社区动态"],
+        "parameters": [
+          {"name": "page", "in": "query", "schema": {"type": "integer"}, "description": "页码"},
+          {"name": "page_size", "in": "query", "schema": {"type": "integer"}, "description": "每页数量"},
+          {"name": "type", "in": "query", "schema": {"type": "string", "enum": ["story", "knowledge", "daily", "other"]}, "description": "类型筛选"}
+        ],
+        "responses": {"200": {"description": "成功"}}
+      },
+      "post": {
+        "summary": "发布动态",
+        "description": "发布新的社区动态",
+        "tags": ["社区动态"],
+        "security": [{"bearerAuth": []}],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["content"],
+                "properties": {
+                  "title": {"type": "string"},
+                  "content": {"type": "string"},
+                  "images": {"type": "array", "items": {"type": "string"}},
+                  "video_url": {"type": "string"},
+                  "type": {"type": "string", "enum": ["story", "knowledge", "daily", "other"]},
+                  "pet_id": {"type": "integer"}
+                }
+              }
+            }
+          }
+        },
+        "responses": {"200": {"description": "发布成功"}}
+      }
+    },
+    "/api/v1/community/posts/search": {
+      "get": {
+        "summary": "搜索动态",
+        "description": "根据关键词搜索动态",
+        "tags": ["社区动态"],
+        "parameters": [
+          {"name": "keyword", "in": "query", "required": true, "schema": {"type": "string"}, "description": "搜索关键词"},
+          {"name": "page", "in": "query", "schema": {"type": "integer"}},
+          {"name": "page_size", "in": "query", "schema": {"type": "integer"}}
+        ],
+        "responses": {"200": {"description": "成功"}}
+      }
+    },
+    "/api/v1/community/posts/my": {
+      "get": {
+        "summary": "获取我的动态",
+        "description": "获取当前用户发布的动态列表",
+        "tags": ["社区动态"],
+        "security": [{"bearerAuth": []}],
+        "parameters": [
+          {"name": "page", "in": "query", "schema": {"type": "integer"}},
+          {"name": "page_size", "in": "query", "schema": {"type": "integer"}}
+        ],
+        "responses": {"200": {"description": "成功"}}
+      }
+    },
+    "/api/v1/community/posts/{id}": {
+      "get": {
+        "summary": "获取动态详情",
+        "description": "根据ID获取动态详情",
+        "tags": ["社区动态"],
+        "parameters": [{"name": "id", "in": "path", "required": true, "schema": {"type": "integer"}}],
+        "responses": {"200": {"description": "成功"}}
+      },
+      "put": {
+        "summary": "更新动态",
+        "description": "更新自己发布的动态",
+        "tags": ["社区动态"],
+        "security": [{"bearerAuth": []}],
+        "parameters": [{"name": "id", "in": "path", "required": true, "schema": {"type": "integer"}}],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": {"type": "string"},
+                  "content": {"type": "string"},
+                  "images": {"type": "array", "items": {"type": "string"}}
+                }
+              }
+            }
+          }
+        },
+        "responses": {"200": {"description": "更新成功"}}
+      },
+      "delete": {
+        "summary": "删除动态",
+        "description": "删除自己发布的动态",
+        "tags": ["社区动态"],
+        "security": [{"bearerAuth": []}],
+        "parameters": [{"name": "id", "in": "path", "required": true, "schema": {"type": "integer"}}],
+        "responses": {"200": {"description": "删除成功"}}
+      }
+    },
+    "/api/v1/community/posts/{id}/like": {
+      "post": {
+        "summary": "点赞动态",
+        "tags": ["社区互动"],
+        "security": [{"bearerAuth": []}],
+        "parameters": [{"name": "id", "in": "path", "required": true, "schema": {"type": "integer"}}],
+        "responses": {"200": {"description": "点赞成功"}}
+      },
+      "delete": {
+        "summary": "取消点赞动态",
+        "tags": ["社区互动"],
+        "security": [{"bearerAuth": []}],
+        "parameters": [{"name": "id", "in": "path", "required": true, "schema": {"type": "integer"}}],
+        "responses": {"200": {"description": "取消成功"}}
+      }
+    },
+    "/api/v1/community/posts/{id}/comments": {
+      "get": {
+        "summary": "获取动态评论列表",
+        "tags": ["社区评论"],
+        "parameters": [
+          {"name": "id", "in": "path", "required": true, "schema": {"type": "integer"}, "description": "动态ID"},
+          {"name": "page", "in": "query", "schema": {"type": "integer"}},
+          {"name": "page_size", "in": "query", "schema": {"type": "integer"}}
+        ],
+        "responses": {"200": {"description": "成功"}}
+      }
+    },
+    "/api/v1/community/comments": {
+      "post": {
+        "summary": "发表评论",
+        "tags": ["社区评论"],
+        "security": [{"bearerAuth": []}],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["post_id", "content"],
+                "properties": {
+                  "post_id": {"type": "integer"},
+                  "content": {"type": "string"},
+                  "parent_id": {"type": "integer", "description": "父评论ID，0为一级评论"},
+                  "reply_to_user_id": {"type": "integer", "description": "回复的用户ID"}
+                }
+              }
+            }
+          }
+        },
+        "responses": {"200": {"description": "评论成功"}}
+      }
+    },
+    "/api/v1/community/comments/{id}": {
+      "delete": {
+        "summary": "删除评论",
+        "tags": ["社区评论"],
+        "security": [{"bearerAuth": []}],
+        "parameters": [{"name": "id", "in": "path", "required": true, "schema": {"type": "integer"}}],
+        "responses": {"200": {"description": "删除成功"}}
+      }
+    },
+    "/api/v1/community/comments/{id}/like": {
+      "post": {
+        "summary": "点赞评论",
+        "tags": ["社区互动"],
+        "security": [{"bearerAuth": []}],
+        "parameters": [{"name": "id", "in": "path", "required": true, "schema": {"type": "integer"}}],
+        "responses": {"200": {"description": "点赞成功"}}
+      },
+      "delete": {
+        "summary": "取消点赞评论",
+        "tags": ["社区互动"],
+        "security": [{"bearerAuth": []}],
+        "parameters": [{"name": "id", "in": "path", "required": true, "schema": {"type": "integer"}}],
+        "responses": {"200": {"description": "取消成功"}}
+      }
     }
   },
   "servers": [
@@ -453,6 +635,18 @@
     {
       "description": "管理员功能",
       "name": "用户管理"
+    },
+    {
+      "description": "社区动态管理",
+      "name": "社区动态"
+    },
+    {
+      "description": "评论管理",
+      "name": "社区评论"
+    },
+    {
+      "description": "点赞功能",
+      "name": "社区互动"
     }
   ]
 }

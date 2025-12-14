@@ -459,9 +459,213 @@ Authorization: Bearer {admin_token}
 
 ---
 
-## 五、系统接口
+## 五、社区模块 `/community`
 
-### 5.1 健康检查
+### 5.1 获取动态列表
+
+```http
+GET /community/posts?page=1&page_size=20&type=daily
+```
+
+**参数:**
+| 参数 | 类型 | 说明 |
+|------|------|------|
+| page | int | 页码（默认1） |
+| page_size | int | 每页数量（默认20） |
+| type | string | 类型筛选: story/knowledge/daily/other |
+
+**响应:**
+```json
+{
+  "code": 200,
+  "data": {
+    "list": [
+      {
+        "id": 1,
+        "user_id": 1,
+        "username": "testuser",
+        "user_avatar": "",
+        "title": "领养日记",
+        "content": "今天带小橘回家了...",
+        "images": ["https://example.com/1.jpg"],
+        "video_url": "",
+        "type": "story",
+        "view_count": 100,
+        "like_count": 10,
+        "comment_count": 5,
+        "is_liked": false,
+        "created_at": "2025-12-14T12:00:00Z"
+      }
+    ],
+    "total": 50,
+    "page": 1,
+    "page_size": 20
+  }
+}
+```
+
+### 5.2 获取动态详情
+
+```http
+GET /community/posts/:id
+```
+
+### 5.3 搜索动态
+
+```http
+GET /community/posts/search?keyword=领养&page=1&page_size=20
+```
+
+### 5.4 发布动态
+
+```http
+POST /community/posts
+Authorization: Bearer {token}
+```
+
+**请求体:**
+```json
+{
+  "title": "我的领养故事",
+  "content": "今天带小橘回家了，很开心！",
+  "images": ["https://example.com/1.jpg", "https://example.com/2.jpg"],
+  "video_url": "",
+  "type": "story",
+  "pet_id": 1
+}
+```
+
+**type 类型:**
+- `story` - 领养故事
+- `knowledge` - 养宠知识
+- `daily` - 日常分享
+- `other` - 其他
+
+### 5.5 更新动态
+
+```http
+PUT /community/posts/:id
+Authorization: Bearer {token}
+```
+
+### 5.6 删除动态
+
+```http
+DELETE /community/posts/:id
+Authorization: Bearer {token}
+```
+
+### 5.7 点赞动态
+
+```http
+POST /community/posts/:id/like
+Authorization: Bearer {token}
+```
+
+### 5.8 取消点赞动态
+
+```http
+DELETE /community/posts/:id/like
+Authorization: Bearer {token}
+```
+
+### 5.9 获取我的动态
+
+```http
+GET /community/posts/my?page=1&page_size=20
+Authorization: Bearer {token}
+```
+
+### 5.10 获取动态评论列表
+
+```http
+GET /community/posts/:id/comments?page=1&page_size=20
+```
+
+**响应:**
+```json
+{
+  "code": 200,
+  "data": {
+    "list": [
+      {
+        "id": 1,
+        "post_id": 1,
+        "user_id": 2,
+        "username": "user2",
+        "user_avatar": "",
+        "parent_id": 0,
+        "content": "好可爱的猫咪！",
+        "like_count": 3,
+        "is_liked": false,
+        "created_at": "2025-12-14T14:00:00Z",
+        "replies": [
+          {
+            "id": 2,
+            "user_id": 1,
+            "username": "testuser",
+            "parent_id": 1,
+            "reply_to_user_id": 2,
+            "reply_to_username": "user2",
+            "content": "谢谢！",
+            "like_count": 1,
+            "created_at": "2025-12-14T14:30:00Z"
+          }
+        ]
+      }
+    ],
+    "total": 10
+  }
+}
+```
+
+### 5.11 发表评论
+
+```http
+POST /community/comments
+Authorization: Bearer {token}
+```
+
+**请求体:**
+```json
+{
+  "post_id": 1,
+  "content": "好可爱的猫咪！",
+  "parent_id": 0,
+  "reply_to_user_id": null
+}
+```
+
+**说明:**
+- `parent_id`: 0 表示一级评论，否则为回复的父评论ID
+- `reply_to_user_id`: 回复指定用户时填写
+
+### 5.12 删除评论
+
+```http
+DELETE /community/comments/:id
+Authorization: Bearer {token}
+```
+
+### 5.13 点赞评论
+
+```http
+POST /community/comments/:id/like
+Authorization: Bearer {token}
+```
+
+### 5.14 取消点赞评论
+
+```http
+DELETE /community/comments/:id/like
+Authorization: Bearer {token}
+```
+
+---
+
+## 六、系统接口
+
+### 6.1 健康检查
 
 ```http
 GET /health
@@ -475,7 +679,7 @@ GET /health
 }
 ```
 
-### 5.2 测试接口
+### 6.2 测试接口
 
 ```http
 GET /api/v1/ping

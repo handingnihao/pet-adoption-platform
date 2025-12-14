@@ -27,6 +27,7 @@ func InitRouter(db *gorm.DB, rdb *redis.Client) *gin.Engine {
 	petCtrl := controller.NewPetController(db, rdb)
 	adoptionCtrl := controller.NewAdoptionController(db)
 	orgCtrl := controller.NewOrganizationController(db)
+	communityCtrl := controller.NewCommunityController(db)
 
 	// 健康检查
 	r.GET("/health", func(c *gin.Context) {
@@ -170,21 +171,34 @@ func InitRouter(db *gorm.DB, rdb *redis.Client) *gin.Engine {
 			}
 		}
 
-		// 社区相关路由（未实现）
-		// community := v1.Group("/community")
-		// {
-		// 	// community.GET("/posts", controller.GetPostList)           // 动态列表（无需登录）
-		// 	// community.GET("/posts/:id", controller.GetPostDetail)     // 动态详情（无需登录）
-		//
-		// 	// 需要登录的接口
-		// 	// communityAuth := community.Group("")
-		// 	// communityAuth.Use(middleware.Auth())
-		// 	// {
-		// 	// 	communityAuth.POST("/posts", controller.CreatePost)         // 发布动态
-		// 	// 	communityAuth.POST("/posts/:id/like", controller.LikePost)  // 点赞动态
-		// 	// 	communityAuth.POST("/posts/:id/comments", controller.CreateComment) // 评论
-		// 	// }
-		// }
+		// 社区相关路由
+		community := v1.Group("/community")
+		{
+			// 公开接口（无需登录）
+			community.GET("/posts", communityCtrl.ListPosts)              // 动态列表
+			community.GET("/posts/search", communityCtrl.SearchPosts)     // 搜索动态
+			community.GET("/posts/:id", communityCtrl.GetPost)            // 动态详情
+			community.GET("/posts/:id/comments", communityCtrl.GetPostComments) // 动态评论列表
+
+			// 需要登录的接口
+			communityAuth := community.Group("")
+			communityAuth.Use(middleware.Auth())
+			{
+				// 动态相关
+				communityAuth.POST("/posts", communityCtrl.CreatePost)           // 发布动态
+				communityAuth.GET("/posts/my", communityCtrl.GetMyPosts)         // 我的动态
+				communityAuth.PUT("/posts/:id", communityCtrl.UpdatePost)        // 更新动态
+				communityAuth.DELETE("/posts/:id", communityCtrl.DeletePost)     // 删除动态
+				communityAuth.POST("/posts/:id/like", communityCtrl.LikePost)    // 点赞动态
+				communityAuth.DELETE("/posts/:id/like", communityCtrl.UnlikePost) // 取消点赞
+
+				// 评论相关
+				communityAuth.POST("/comments", communityCtrl.CreateComment)           // 发表评论
+				communityAuth.DELETE("/comments/:id", communityCtrl.DeleteComment)     // 删除评论
+				communityAuth.POST("/comments/:id/like", communityCtrl.LikeComment)    // 点赞评论
+				communityAuth.DELETE("/comments/:id/like", communityCtrl.UnlikeComment) // 取消点赞评论
+			}
+		}
 
 		// 捐赠相关路由（未实现）
 		// donations := v1.Group("/donations")

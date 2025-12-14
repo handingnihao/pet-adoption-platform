@@ -151,6 +151,24 @@ curl http://localhost:8080/api/v1/ping
 | DELETE | `/:id` | 登录 | 删除机构 |
 | PUT | `/:id/status` | 管理员 | 审核机构 |
 
+### 社区接口 `/api/v1/community`
+| 方法 | 路径 | 权限 | 说明 |
+|------|------|------|------|
+| GET | `/posts` | 公开 | 动态列表 |
+| GET | `/posts/search` | 公开 | 搜索动态 |
+| GET | `/posts/:id` | 公开 | 动态详情 |
+| GET | `/posts/:id/comments` | 公开 | 评论列表 |
+| POST | `/posts` | 登录 | 发布动态 |
+| GET | `/posts/my` | 登录 | 我的动态 |
+| PUT | `/posts/:id` | 登录 | 更新动态 |
+| DELETE | `/posts/:id` | 登录 | 删除动态 |
+| POST | `/posts/:id/like` | 登录 | 点赞动态 |
+| DELETE | `/posts/:id/like` | 登录 | 取消点赞 |
+| POST | `/comments` | 登录 | 发表评论 |
+| DELETE | `/comments/:id` | 登录 | 删除评论 |
+| POST | `/comments/:id/like` | 登录 | 点赞评论 |
+| DELETE | `/comments/:id/like` | 登录 | 取消点赞 |
+
 ### Swagger 文档
 接口文档: http://localhost:8080/swagger/index.html
 
@@ -203,8 +221,14 @@ curl http://localhost:8080/api/v1/ping
 - [x] 更新/删除机构
 - [x] 机构审核（管理员）
 
+**社区模块**
+- [x] 发布/更新/删除动态
+- [x] 动态列表/详情/搜索
+- [x] 我的动态
+- [x] 评论功能（发表/删除/回复）
+- [x] 点赞功能（动态/评论）
+
 ### 计划中 📋
-- [ ] 社区功能（动态、评论、点赞）
 - [ ] 捐赠系统
 - [ ] 回访系统
 - [ ] 消息通知
