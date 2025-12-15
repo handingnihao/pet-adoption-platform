@@ -15,6 +15,7 @@ import { Community } from '../pages/Community'
 import { PostDetail } from '../pages/PostDetail'
 import { CreatePost } from '../pages/CreatePost'
 import { Guide } from '../pages/Guide'
+import { About } from '../pages/About'
 import { AdminDashboard } from '../pages/admin/Dashboard'
 import { UserManagement } from '../pages/admin/UserManagement'
 import { PetManagement } from '../pages/admin/PetManagement'
@@ -40,7 +41,7 @@ export const router = createBrowserRouter([
       { path: 'community/create', element: <CreatePost /> },
       { path: 'community/:id', element: <PostDetail /> },
       { path: 'guide', element: <Guide /> },
-      { path: 'about', element: <div className="container py-8 text-center"><h1 className="text-2xl font-bold mb-4">关于我们</h1><p className="text-muted-foreground">页面开发中...</p></div> },
+      { path: 'about', element: <About /> },
     ],
   },
   {

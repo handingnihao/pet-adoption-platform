@@ -45,10 +45,12 @@ func (d *PetDAO) List(ctx context.Context, page, pageSize int) ([]*model.Pet, in
 var pets []*model.Pet
 var total int64
 offset := (page - 1) * pageSize
-if err := d.db.WithContext(ctx).Model(&model.Pet{}).Count(&total).Error; err != nil {
+// 只查询已发布状态的宠物
+query := d.db.WithContext(ctx).Model(&model.Pet{}).Where("status = ?", model.PetStatusAvailable)
+if err := query.Count(&total).Error; err != nil {
 return nil, 0, err
 }
-err := d.db.WithContext(ctx).Preload("User").Offset(offset).Limit(pageSize).Order("created_at DESC").Find(&pets).Error
+err := query.Preload("User").Offset(offset).Limit(pageSize).Order("created_at DESC").Find(&pets).Error
 return pets, total, err
 }
 
@@ -75,8 +77,11 @@ query = query.Where("gender = ?", req.Gender)
 if req.Size != "" {
 query = query.Where("size = ?", req.Size)
 }
+// 如果没有指定状态，默认只查询已发布的宠物
 if req.Status != nil {
 query = query.Where("status = ?", *req.Status)
+} else {
+query = query.Where("status = ?", model.PetStatusAvailable)
 }
 if req.Province != "" {
 query = query.Where("province = ?", req.Province)
@@ -100,7 +105,8 @@ return query
 func (d *PetDAO) SearchByKeyword(ctx context.Context, keyword string, page, pageSize int) ([]*model.Pet, int64, error) {
 var pets []*model.Pet
 var total int64
-query := d.db.WithContext(ctx).Model(&model.Pet{})
+// 只搜索已发布状态的宠物
+query := d.db.WithContext(ctx).Model(&model.Pet{}).Where("status = ?", model.PetStatusAvailable)
 if keyword != "" {
 query = query.Where("MATCH(name, breed, description) AGAINST(? IN NATURAL LANGUAGE MODE)", keyword)
 }

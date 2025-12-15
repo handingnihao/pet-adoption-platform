@@ -38,7 +38,7 @@ export function UserManagement() {
   })
 
   const users = data?.data?.list || []
-  const total = data?.data?.total || 0
+  const total = data?.data?.pagination?.total || data?.data?.total || 0
   const totalPages = Math.ceil(total / 10)
 
   const handleSearch = (e: React.FormEvent) => {

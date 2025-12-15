@@ -103,7 +103,7 @@ func (Pet) TableName() string {
 // PetCreateRequest 创建宠物请求
 type PetCreateRequest struct {
 	Name         string    `json:"name" binding:"required,min=1,max=100"`
-	Type         PetType   `json:"type" binding:"required,oneof=dog cat rabbit bird other"`
+	Type         PetType   `json:"type" binding:"required,oneof=dog cat rabbit hamster bird other"`
 	Breed        string    `json:"breed" binding:"max=100"`
 	Gender       PetGender `json:"gender" binding:"oneof=male female unknown"`
 	Age          int       `json:"age" binding:"min=0,max=300"`
@@ -126,7 +126,7 @@ type PetCreateRequest struct {
 // PetUpdateRequest 更新宠物请求
 type PetUpdateRequest struct {
 	Name         *string    `json:"name" binding:"omitempty,min=1,max=100"`
-	Type         *PetType   `json:"type" binding:"omitempty,oneof=dog cat rabbit bird other"`
+	Type         *PetType   `json:"type" binding:"omitempty,oneof=dog cat rabbit hamster bird other"`
 	Breed        *string    `json:"breed" binding:"omitempty,max=100"`
 	Gender       *PetGender `json:"gender" binding:"omitempty,oneof=male female unknown"`
 	Age          *int       `json:"age" binding:"omitempty,min=0,max=300"`

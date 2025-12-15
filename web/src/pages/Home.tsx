@@ -1,9 +1,18 @@
 import { Link } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
 import { PawPrint, Heart, Users, Search, ArrowRight } from 'lucide-react'
 import { Button } from '../components/ui/button'
 import { Card, CardContent } from '../components/ui/card'
+import { petApi } from '../lib/api'
 
 export function Home() {
+  // 获取宠物统计数据
+  const { data: statsData } = useQuery({
+    queryKey: ['pet-statistics'],
+    queryFn: () => petApi.getStatistics(),
+    staleTime: 60000, // 1分钟缓存
+  })
+
   const features = [
     {
       icon: Search,
@@ -22,13 +31,16 @@ export function Home() {
     }
   ]
 
+  // 从API获取的统计数据
+  const byType = statsData?.data?.by_type || {}
+  
   const petTypes = [
-    { name: '猫咪', image: '🐱', count: 128 },
-    { name: '狗狗', image: '🐕', count: 256 },
-    { name: '兔子', image: '🐰', count: 45 },
-    { name: '仓鼠', image: '🐹', count: 32 },
-    { name: '鸟类', image: '🐦', count: 28 },
-    { name: '其他', image: '🐾', count: 15 }
+    { name: '猫咪', type: 'cat', image: '🐱', count: byType['cat'] || 0 },
+    { name: '狗狗', type: 'dog', image: '🐕', count: byType['dog'] || 0 },
+    { name: '兔子', type: 'rabbit', image: '🐰', count: byType['rabbit'] || 0 },
+    { name: '仓鼠', type: 'hamster', image: '🐹', count: byType['hamster'] || 0 },
+    { name: '鸟类', type: 'bird', image: '🐦', count: byType['bird'] || 0 },
+    { name: '其他', type: 'other', image: '🐾', count: byType['other'] || 0 }
   ]
 
   return (
@@ -106,20 +118,20 @@ export function Home() {
             <p className="text-muted-foreground">选择你感兴趣的宠物类型</p>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-            {petTypes.map((type) => (
+            {petTypes.map((item) => (
               <Link
-                key={type.name}
-                to={`/pets?type=${type.name}`}
+                key={item.type}
+                to={`/pets?type=${item.type}`}
                 className="group"
               >
                 <Card className="hover:border-primary transition-colors">
                   <CardContent className="p-6 text-center">
-                    <div className="text-5xl mb-3">{type.image}</div>
+                    <div className="text-5xl mb-3">{item.image}</div>
                     <div className="font-medium group-hover:text-primary transition-colors">
-                      {type.name}
+                      {item.name}
                     </div>
                     <div className="text-sm text-muted-foreground">
-                      {type.count} 只待领养
+                      {item.count} 只待领养
                     </div>
                   </CardContent>
                 </Card>

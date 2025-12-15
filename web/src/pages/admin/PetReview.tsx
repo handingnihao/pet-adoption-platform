@@ -35,7 +35,7 @@ export function PetReview() {
   })
 
   const pets = data?.data?.list || []
-  const total = data?.data?.total || 0
+  const total = data?.data?.pagination?.total || data?.data?.total || 0
   const totalPages = Math.ceil(total / 10)
 
   const handleApprove = (pet: Pet) => {

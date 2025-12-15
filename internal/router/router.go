@@ -83,6 +83,7 @@ func InitRouter(db *gorm.DB, rdb *redis.Client) *gin.Engine {
 			pets.GET("/query", petCtrl.QueryPets)                // 条件查询
 			pets.GET("/search", petCtrl.SearchPets)              // 搜索宠物
 			pets.GET("/recommended", petCtrl.GetRecommendedPets) // 推荐宠物
+			pets.GET("/statistics", petCtrl.GetStatistics)       // 统计信息（公开）
 			pets.GET("/:id", petCtrl.GetPetDetail)               // 宠物详情
 
 			// 需要登录的接口
@@ -104,7 +105,6 @@ func InitRouter(db *gorm.DB, rdb *redis.Client) *gin.Engine {
 				petsAdmin.PUT("/:id/approve", petCtrl.ApprovePet)       // 审核通过
 				petsAdmin.PUT("/:id/reject", petCtrl.RejectPet)         // 拒绝
 				petsAdmin.PUT("/:id/admin", petCtrl.AdminUpdatePet)     // 管理员更新宠物
-				petsAdmin.GET("/statistics", petCtrl.GetStatistics)     // 统计信息
 			}
 		}
 

@@ -46,9 +46,15 @@ export interface ApiResponse<T = unknown> {
 
 export interface PageResponse<T> {
   list: T[]
-  total: number
-  page: number
-  page_size: number
+  total?: number
+  page?: number
+  page_size?: number
+  pagination?: {
+    total: number
+    page: number
+    page_size: number
+    total_pages: number
+  }
 }
 
 // 用户相关 API
@@ -78,6 +84,16 @@ export const petApi = {
   getMyPets: (params?: { page?: number; page_size?: number }) =>
     api.get<unknown, ApiResponse<PageResponse<Pet>>>('/pets/my', { params }),
   getRecommended: () => api.get<unknown, ApiResponse<Pet[]>>('/pets/recommended'),
+  getStatistics: () => api.get<unknown, ApiResponse<PetStatistics>>('/pets/statistics'),
+}
+
+// 宠物统计类型
+export interface PetStatistics {
+  total: number
+  pending: number
+  approved: number
+  rejected: number
+  by_type: Record<string, number>
 }
 
 // 领养相关 API
