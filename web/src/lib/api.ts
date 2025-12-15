@@ -90,9 +90,10 @@ export const petApi = {
 // 宠物统计类型
 export interface PetStatistics {
   total: number
+  available: number
   pending: number
-  approved: number
-  rejected: number
+  adopted: number
+  offline: number
   by_type: Record<string, number>
 }
 

@@ -169,33 +169,67 @@ updates := map[string]interface{}{"status": status, "reviewed_by": reviewerID, "
 return d.db.WithContext(ctx).Model(&model.Pet{}).Where("id = ?", petID).Updates(updates).Error
 }
 
-func (d *PetDAO) GetStatistics(ctx context.Context) (map[string]int64, error) {
-stats := make(map[string]int64)
-var total int64
-if err := d.db.WithContext(ctx).Model(&model.Pet{}).Count(&total).Error; err != nil {
-return nil, err
+// PetStatistics 宠物统计结果
+type PetStatistics struct {
+	Total     int64            `json:"total"`
+	Available int64            `json:"available"`
+	Pending   int64            `json:"pending"`
+	Adopted   int64            `json:"adopted"`
+	Offline   int64            `json:"offline"`
+	ByType    map[string]int64 `json:"by_type"`
 }
-stats["total"] = total
-var statusCounts []struct {
-Status model.PetStatus
-Count  int64
-}
-if err := d.db.WithContext(ctx).Model(&model.Pet{}).Select("status, COUNT(*) as count").Group("status").Scan(&statusCounts).Error; err != nil {
-return nil, err
-}
-for _, sc := range statusCounts {
-switch sc.Status {
-case model.PetStatusPending:
-stats["pending"] = sc.Count
-case model.PetStatusAvailable:
-stats["available"] = sc.Count
-case model.PetStatusAdopted:
-stats["adopted"] = sc.Count
-case model.PetStatusOffline:
-stats["offline"] = sc.Count
-}
-}
-return stats, nil
+
+func (d *PetDAO) GetStatistics(ctx context.Context) (*PetStatistics, error) {
+	stats := &PetStatistics{
+		ByType: make(map[string]int64),
+	}
+
+	// 总数
+	if err := d.db.WithContext(ctx).Model(&model.Pet{}).Count(&stats.Total).Error; err != nil {
+		return nil, err
+	}
+
+	// 按状态统计
+	var statusCounts []struct {
+		Status model.PetStatus
+		Count  int64
+	}
+	if err := d.db.WithContext(ctx).Model(&model.Pet{}).
+		Select("status, COUNT(*) as count").
+		Group("status").
+		Scan(&statusCounts).Error; err != nil {
+		return nil, err
+	}
+	for _, sc := range statusCounts {
+		switch sc.Status {
+		case model.PetStatusPending:
+			stats.Pending = sc.Count
+		case model.PetStatusAvailable:
+			stats.Available = sc.Count
+		case model.PetStatusAdopted:
+			stats.Adopted = sc.Count
+		case model.PetStatusOffline:
+			stats.Offline = sc.Count
+		}
+	}
+
+	// 按类型统计（只统计可领养状态的宠物）
+	var typeCounts []struct {
+		Type  string
+		Count int64
+	}
+	if err := d.db.WithContext(ctx).Model(&model.Pet{}).
+		Select("type, COUNT(*) as count").
+		Where("status = ?", model.PetStatusAvailable).
+		Group("type").
+		Scan(&typeCounts).Error; err != nil {
+		return nil, err
+	}
+	for _, tc := range typeCounts {
+		stats.ByType[tc.Type] = tc.Count
+	}
+
+	return stats, nil
 }
 
 func (d *PetDAO) GetRecommended(ctx context.Context, limit int) ([]*model.Pet, error) {

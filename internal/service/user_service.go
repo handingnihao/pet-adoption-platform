@@ -103,29 +103,11 @@ func (s *UserService) Register(req *model.UserRegisterRequest) (*model.User, err
 
 // Login 用户登录
 func (s *UserService) Login(req *model.UserLoginRequest, ip string) (*model.UserLoginResponse, error) {
-	// 1. 查询用户
-	var user *model.User
-	var err error
-
-	// 支持用户名、手机号、邮箱登录
-	user, err = s.userDAO.GetByUsername(req.Username)
+	// 1. 查询用户（合并查询优化：一次查询支持用户名/手机号/邮箱）
+	user, err := s.userDAO.GetByLoginIdentifier(req.Username)
 	if err != nil {
 		logger.Error("查询用户失败", zap.Error(err))
 		return nil, err
-	}
-
-	if user == nil {
-		user, err = s.userDAO.GetByPhone(req.Username)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	if user == nil {
-		user, err = s.userDAO.GetByEmail(req.Username)
-		if err != nil {
-			return nil, err
-		}
 	}
 
 	if user == nil {

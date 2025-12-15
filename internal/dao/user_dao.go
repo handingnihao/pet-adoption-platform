@@ -75,6 +75,22 @@ func (dao *UserDAO) GetByEmail(email string) (*model.User, error) {
 	return &user, nil
 }
 
+// GetByLoginIdentifier 根据用户名/手机号/邮箱查询（合并查询，优化登录性能）
+func (dao *UserDAO) GetByLoginIdentifier(identifier string) (*model.User, error) {
+	var user model.User
+	err := dao.db.Where(
+		"(username = ? OR phone = ? OR email = ?) AND deleted_at IS NULL",
+		identifier, identifier, identifier,
+	).First(&user).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return &user, nil
+}
+
 // Update 更新用户信息
 func (dao *UserDAO) Update(user *model.User) error {
 	return dao.db.Save(user).Error

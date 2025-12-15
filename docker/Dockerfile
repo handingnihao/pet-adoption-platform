@@ -1,5 +1,5 @@
-# 构建阶段
-FROM golang:1.21-alpine AS builder
+# 后端构建阶段
+FROM golang:1.25-alpine AS backend-builder
 
 WORKDIR /app
 
@@ -21,17 +21,24 @@ FROM alpine:latest
 
 RUN apk --no-cache add ca-certificates tzdata
 
+# 设置时区
+ENV TZ=Asia/Shanghai
+
 WORKDIR /root/
 
 # 从构建阶段复制二进制文件
-COPY --from=builder /app/server .
-COPY --from=builder /app/config ./config
+COPY --from=backend-builder /app/server .
+COPY --from=backend-builder /app/config ./config
 
 # 创建日志目录
 RUN mkdir -p logs
 
 # 暴露端口
 EXPOSE 8080
+
+# 健康检查
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD wget --quiet --tries=1 --spider http://localhost:8080/health || exit 1
 
 # 运行
 CMD ["./server"]

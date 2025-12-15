@@ -254,8 +254,8 @@ responses[i] = s.convertToResponse(pet)
 return responses, nil
 }
 
-func (s *PetService) GetStatistics(ctx context.Context) (map[string]int64, error) {
-return s.dao.GetStatistics(ctx)
+func (s *PetService) GetStatistics(ctx context.Context) (*dao.PetStatistics, error) {
+	return s.dao.GetStatistics(ctx)
 }
 
 func (s *PetService) convertToResponse(pet *model.Pet) *model.PetResponse {

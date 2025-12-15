@@ -9,8 +9,8 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: 123456
       MYSQL_DATABASE: pet_adoption
-      MYSQL_USER: pet_user
-      MYSQL_PASSWORD: pet_pass
+      MYSQL_USER: pet_admin
+      MYSQL_PASSWORD: pet_admin_password
       TZ: Asia/Shanghai
     ports:
       - "3306:3306"
@@ -18,6 +18,11 @@ services:
       - mysql_data:/var/lib/mysql
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
     command: --default-authentication-plugin=mysql_native_password --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     networks:
       - pet-network
 
@@ -30,26 +35,49 @@ services:
       - "6379:6379"
     volumes:
       - redis_data:/data
-    command: redis-server --appendonly yes
+    command: redis-server --appendonly yes --requirepass redis_password
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
     networks:
       - pet-network
 
-  # 应用服务
-  app:
+  # 后端应用服务
+  backend:
     build:
       context: ..
       dockerfile: docker/Dockerfile
-    container_name: pet-adoption-app
+    container_name: pet-adoption-backend
     restart: always
     ports:
       - "8080:8080"
     depends_on:
-      - mysql
-      - redis
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     environment:
       - GIN_MODE=release
+      - TZ=Asia/Shanghai
     volumes:
       - ../logs:/root/logs
+      - ../config:/root/config
+    networks:
+      - pet-network
+
+  # 前端应用服务
+  frontend:
+    build:
+      context: ../web
+      dockerfile: Dockerfile
+    container_name: pet-adoption-frontend
+    restart: always
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
     networks:
       - pet-network
 
