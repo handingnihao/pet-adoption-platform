@@ -1,13 +1,20 @@
 # 爱心宠物领养平台 (Pet Adoption Platform)
 
-基于 Go + Gin + MySQL + Redis 的宠物领养平台后端服务
+基于 Go + Gin + MySQL + Redis + React + TypeScript 的全栈宠物领养平台
 
 ## 项目简介
 
 爱心宠物领养平台是一个连接宠物救助机构、志愿者与潜在领养者的综合性在线平台。通过信息化手段，提高流浪动物的领养率，促进人与动物的和谐共处。
 
+### 核心价值
+- 🐾 **领养代替购买**：让每一只流浪动物都能找到温暖的家
+- 🤝 **连接爱心**：搭建救助机构与领养者之间的桥梁
+- 📱 **便捷体验**：现代化的Web界面，流畅的用户体验
+- 🔒 **安全可靠**：完善的审核机制，保障领养双方权益
+
 ## 技术栈
 
+### 后端
 - **语言**: Go 1.21+
 - **框架**: Gin
 - **数据库**: MySQL 8.0+
@@ -17,17 +24,26 @@
 - **配置**: Viper
 - **认证**: JWT
 
+### 前端
+- **框架**: React 18 + TypeScript
+- **构建工具**: Vite 6
+- **UI组件**: shadcn/ui + TailwindCSS
+- **状态管理**: Zustand
+- **路由**: React Router v6
+- **数据请求**: TanStack Query + Axios
+- **图标**: Lucide React
+
 ## 项目结构
 
 ```
 pet-adoption-platform/
-├── cmd/                    # 应用入口
+├── cmd/                    # 后端应用入口
 │   └── server/
 │       └── main.go
-├── config/                 # 配置文件
+├── config/                 # 后端配置文件
 │   ├── config.yaml
 │   └── config.go
-├── internal/               # 内部代码
+├── internal/               # 后端内部代码
 │   ├── router/            # 路由层
 │   ├── controller/        # 控制器层
 │   ├── service/           # 服务层
@@ -39,10 +55,22 @@ pet-adoption-platform/
 │   ├── cache/             # 缓存
 │   ├── database/          # 数据库
 │   └── response/          # 统一响应
-├── api/                    # API文档
-├── scripts/                # 脚本
-├── test/                   # 测试
-├── docs/                   # 文档
+├── web/                    # 前端项目
+│   ├── src/
+│   │   ├── components/    # UI组件
+│   │   │   ├── ui/       # 基础组件(Button, Card, Input...)
+│   │   │   └── layout/   # 布局组件(Header, Footer, Layout...)
+│   │   ├── pages/         # 页面组件
+│   │   │   ├── admin/    # 管理后台页面
+│   │   │   └── ...       # 用户端页面
+│   │   ├── lib/           # 工具库(API客户端, 工具函数)
+│   │   ├── store/         # 状态管理(Zustand)
+│   │   ├── router/        # 路由配置
+│   │   └── index.css      # 全局样式
+│   ├── package.json
+│   └── vite.config.ts
+├── docs/                   # 项目文档
+├── scripts/                # 脚本(数据库迁移等)
 └── docker/                 # Docker配置
 ```
 
@@ -51,51 +79,58 @@ pet-adoption-platform/
 ### 1. 环境要求
 
 - Go 1.21+
+- Node.js 18+
 - MySQL 8.0+
 - Redis 7.0+
 
-### 2. 安装依赖
+### 2. 后端启动
 
 ```bash
+# 安装依赖
 go mod tidy
-```
 
-### 3. 配置文件
+# 配置文件
+# 复制 config/config.yaml.example 为 config/config.yaml，修改数据库和Redis配置
 
-复制 `config/config.yaml.example` 并重命名为 `config/config.yaml`，修改数据库和Redis配置。
+# 初始化数据库
+mysql -u root -p -e "CREATE DATABASE pet_adoption CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
 
-### 4. 初始化数据库
-
-```bash
-# 创建数据库
-mysql -u root -p
-CREATE DATABASE pet_adoption CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-
-# 运行迁移脚本
-go run scripts/migration/init_db.go
-```
-
-### 5. 启动服务
-
-```bash
-# 开发模式
+# 启动后端服务
 go run cmd/server/main.go
-
-# 编译运行
-go build -o bin/server cmd/server/main.go
-./bin/server
 ```
 
-服务将在 http://localhost:8080 启动
+后端服务运行在 http://localhost:8080
 
-### 6. 测试接口
+### 3. 前端启动
 
 ```bash
-# 健康检查
+# 进入前端目录
+cd web
+
+# 安装依赖
+npm install
+
+# 启动开发服务器
+npm run dev
+```
+
+前端服务运行在 http://localhost:3000
+
+### 4. 测试账号
+
+| 角色 | 用户名 | 密码 |
+|------|--------|------|
+| 管理员 | admin | Test@123456 |
+| 普通用户 | testuser | Test@123456 |
+
+### 5. 验证服务
+
+```bash
+# 后端健康检查
 curl http://localhost:8080/health
 
-# 测试接口
-curl http://localhost:8080/api/v1/ping
+# 前端访问
+open http://localhost:3000
 ```
 
 ## API 接口
@@ -176,8 +211,8 @@ curl http://localhost:8080/api/v1/ping
 
 ### 已完成 ✅
 
-**基础架构**
-- [x] 项目框架搭建
+**后端基础架构**
+- [x] 项目框架搭建 (Go + Gin)
 - [x] 配置管理 (Viper)
 - [x] 数据库连接 (GORM + MySQL)
 - [x] Redis缓存
@@ -186,54 +221,71 @@ curl http://localhost:8080/api/v1/ping
 - [x] 统一响应格式
 - [x] 中间件（CORS、日志、限流、认证、权限）
 
+**前端基础架构**
+- [x] React + TypeScript + Vite 项目搭建
+- [x] TailwindCSS + shadcn/ui 组件库
+- [x] Zustand 状态管理
+- [x] React Router 路由系统
+- [x] Axios API客户端 + 拦截器
+- [x] TanStack Query 数据请求
+
 **用户模块**
-- [x] 用户注册
-- [x] 用户登录
-- [x] 获取/更新个人信息
-- [x] 修改密码
-- [x] 用户列表（管理员）
-- [x] 用户搜索（管理员）
-- [x] 禁用/启用用户（管理员）
+- [x] 后端：注册/登录/个人信息/修改密码
+- [x] 后端：用户列表/搜索/禁用启用（管理员）
+- [x] 前端：登录/注册页面
+- [x] 前端：个人中心页面
+- [x] 前端：用户管理页面（管理员）
 
 **宠物模块**
-- [x] 宠物发布
-- [x] 宠物列表/详情
-- [x] 宠物搜索/条件查询
-- [x] 推荐宠物
-- [x] 我的宠物
-- [x] 更新/删除/下架宠物
-- [x] 宠物审核（管理员）
-- [x] 宠物统计（管理员）
+- [x] 后端：发布/列表/详情/搜索/条件查询
+- [x] 后端：推荐/我的宠物/更新/删除
+- [x] 后端：审核/统计（管理员）
+- [x] 前端：宠物列表页（筛选/搜索）
+- [x] 前端：宠物详情页
+- [x] 前端：发布宠物页面
+- [x] 前端：我的宠物页面
+- [x] 前端：宠物管理页面（管理员，含编辑功能）
 
 **领养模块**
-- [x] 提交领养申请
-- [x] 我的申请列表
-- [x] 申请详情/更新/取消
-- [x] 我的领养记录
-- [x] 申请审核（管理员）
-- [x] 领养记录管理（管理员）
-- [x] 领养统计（管理员）
+- [x] 后端：提交申请/我的申请/详情/更新/取消
+- [x] 后端：我的领养记录
+- [x] 后端：申请审核/记录管理/统计（管理员）
+- [x] 前端：领养申请页面
+- [x] 前端：我的申请页面
+- [x] 前端：领养管理页面（管理员）
 
 **机构模块**
-- [x] 机构入驻申请
-- [x] 机构列表/详情
-- [x] 我的机构
-- [x] 更新/删除机构
-- [x] 机构审核（管理员）
+- [x] 后端：入驻申请/列表/详情/更新/删除
+- [x] 后端：我的机构/审核（管理员）
+- [x] 前端：机构审核页面（管理员）
 
 **社区模块**
-- [x] 发布/更新/删除动态
-- [x] 动态列表/详情/搜索
-- [x] 我的动态
-- [x] 评论功能（发表/删除/回复）
-- [x] 点赞功能（动态/评论）
+- [x] 后端：发布/更新/删除动态
+- [x] 后端：动态列表/详情/搜索/我的动态
+- [x] 后端：评论功能（发表/删除/回复）
+- [x] 后端：点赞功能（动态/评论）
+- [x] 前端：社区动态列表页
+- [x] 前端：发布动态页面
+
+**管理后台**
+- [x] 管理员布局（侧边栏导航）
+- [x] 仪表盘（统计数据）
+- [x] 用户管理
+- [x] 宠物管理（含编辑功能）
+- [x] 领养管理
+- [x] 机构审核
+
+**其他页面**
+- [x] 首页（推荐宠物、统计、介绍）
+- [x] 领养指南页面
 
 ### 计划中 📋
 - [ ] 捐赠系统
 - [ ] 回访系统
 - [ ] 消息通知
 - [ ] 文件上传（OSS）
-- [ ] 数据统计仪表盘
+- [ ] 数据统计可视化图表
+- [ ] 关于我们页面
 
 ## 开发规范
 
@@ -291,20 +343,34 @@ CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o bin/server cmd/server/main.go
 - 响应时间: < 100ms
 - 并发用户: 10000+
 
-## 贡献
-
-欢迎提交 Issue 和 Pull Request！
-
 ## 许可证
 
 MIT License
 
-## 联系方式
+## 前端页面预览
 
-- 项目主页: https://github.com/your-org/pet-adoption-platform
-- 问题反馈: https://github.com/your-org/pet-adoption-platform/issues
+| 页面 | 路径 | 说明 |
+|------|------|------|
+| 首页 | `/` | 平台介绍、推荐宠物、统计数据 |
+| 宠物列表 | `/pets` | 浏览所有宠物，支持筛选搜索 |
+| 宠物详情 | `/pets/:id` | 查看宠物详细信息 |
+| 发布宠物 | `/pets/create` | 发布新宠物 |
+| 领养申请 | `/adopt/:id` | 提交领养申请 |
+| 领养指南 | `/guide` | 详细的领养须知 |
+| 社区 | `/community` | 社区动态列表 |
+| 发布动态 | `/community/create` | 发布社区动态 |
+| 登录 | `/login` | 用户登录 |
+| 注册 | `/register` | 用户注册 |
+| 个人中心 | `/profile` | 个人信息管理 |
+| 我的宠物 | `/my-pets` | 管理发布的宠物 |
+| 我的申请 | `/my-applications` | 查看领养申请 |
+| 管理后台 | `/admin` | 管理员仪表盘 |
+| 用户管理 | `/admin/users` | 管理用户 |
+| 宠物管理 | `/admin/pets` | 管理所有宠物 |
+| 领养管理 | `/admin/adoptions` | 审核领养申请 |
+| 机构审核 | `/admin/organizations` | 审核机构入驻 |
 
 ---
 
-**文档版本**: v1.1  
-**最后更新**: 2025-12-14
+**文档版本**: v2.0  
+**最后更新**: 2025-12-15
