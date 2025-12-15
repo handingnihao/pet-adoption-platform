@@ -72,7 +72,7 @@ export function Community() {
       navigate('/login')
       return
     }
-    likeMutation.mutate({ id: post.id, isLiked: post.is_liked })
+    likeMutation.mutate({ id: Number(post.id), isLiked: post.is_liked })
   }
 
   return (
@@ -147,7 +147,12 @@ export function Community() {
               key={post.id}
               post={post}
               onLike={() => handleLike(post)}
-              onClick={() => navigate(`/community/${post.id}`)}
+              onClick={() => {
+                const postId = Number(post.id)
+                if (!isNaN(postId) && postId > 0) {
+                  navigate(`/community/${postId}`)
+                }
+              }}
             />
           ))}
 

@@ -6,26 +6,26 @@ const teamMembers = [
   {
     name: '唐非',
     role: '总负责人与后端开发',
-    avatar: '', // 头像URL，留空使用默认
-    description: '负责项目整体规划与协调\n后端架构设计与开发',
+    avatar: 'https://page-image.tos-cn-guangzhou.volces.com/hajimi-project/tf.jpg', // 头像URL，留空使用默认
+    description: `项目整体规划与协调\n后端架构设计与开发`,
   },
   {
     name: '梁展图',
     role: '运维与后端开发',
-    avatar: '',
-    description: '负责服务器运维与后端开发',
+    avatar: 'https://page-image.tos-cn-guangzhou.volces.com/hajimi-project/lzt.jpg',
+    description: '后端开发\n服务器运维',
   },
   {
     name: '王烨枫',
     role: '前端与静态资源维护',
-    avatar: '',
-    description: '负责前端界面开发与COS静态资源维护',
+    avatar: 'https://page-image.tos-cn-guangzhou.volces.com/hajimi-project/wyf.jpg',
+    description: '前端界面开发\nCOS静态资源维护',
   },
   {
       name: '林訉毅',
       role: '前端与项目设计',
-      avatar: '',
-      description: '负责前端界面设计与前后端联调',
+      avatar: 'https://page-image.tos-cn-guangzhou.volces.com/hajimi-project/lfy.jpg',
+      description: '前后端联调与接口测试\n前端界面设计',
   },
 ]
 
@@ -33,8 +33,8 @@ const teamMembers = [
 const milestones = [
   { date: '2025年12月8日', title: '项目启动', description: '确定项目方向，组建团队' },
   { date: '2025年12月9日', title: '需求分析', description: '完成需求调研与技术选型' },
-  { date: '2024年12月9日-15日', title: '开发阶段', description: '核心功能开发与测试' },
-  { date: '2024年12月', title: '项目上线', description: '完成部署，正式发布' },
+  { date: '2025年12月9日-15日', title: '开发阶段', description: '核心功能开发与测试' },
+  { date: '2025年12月', title: '项目上线', description: '完成部署，正式发布' },
 ]
 
 export function About() {
@@ -121,7 +121,7 @@ export function About() {
                   </div>
                   <h3 className="font-bold text-lg mb-1">{member.name}</h3>
                   <p className="text-primary text-sm mb-2">{member.role}</p>
-                  <p className="text-muted-foreground text-sm">{member.description}</p>
+                  <p className="text-muted-foreground text-sm whitespace-pre-line">{member.description}</p>
                 </CardContent>
               </Card>
             ))}
@@ -210,7 +210,7 @@ export function About() {
                 邮箱联系
               </a>
               <a
-                href="https://gitee.com/your-username/pet-adoption-platform"
+                href="https://gitee.com/olrain/pet-adoption-platform"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 px-6 py-3 bg-muted text-foreground rounded-lg hover:bg-muted/80 transition-colors"

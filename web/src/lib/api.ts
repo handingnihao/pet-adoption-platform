@@ -246,7 +246,7 @@ export interface AdoptionRecord {
 }
 
 export interface Post {
-  id: number
+  id: number | string
   user_id: number
   username?: string
   user_avatar?: string

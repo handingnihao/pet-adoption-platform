@@ -77,7 +77,7 @@ type PostUpdateRequest struct {
 
 // PostInfo 动态信息响应
 type PostInfo struct {
-	ID           uint64    `json:"id"`
+	ID           uint64    `json:"id,string"`
 	UserID       uint64    `json:"user_id"`
 	Username     string    `json:"username"`
 	UserAvatar   string    `json:"user_avatar"`
