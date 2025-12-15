@@ -10,16 +10,33 @@ import (
 	"strings"
 
 	_ "github.com/go-sql-driver/mysql"
+	"gopkg.in/yaml.v3"
 )
 
-// 数据库配置 - 请根据实际情况修改
-const (
-	DBUser     = "root"
-	DBPassword = "root"
-	DBHost     = "127.0.0.1"
-	DBPort     = "3306"
-	DBName     = "pet_adoption"
-)
+// 配置结构
+type Config struct {
+	Database struct {
+		MySQL struct {
+			Host     string `yaml:"host"`
+			Port     int    `yaml:"port"`
+			Username string `yaml:"username"`
+			Password string `yaml:"password"`
+			Database string `yaml:"database"`
+		} `yaml:"mysql"`
+	} `yaml:"database"`
+}
+
+func loadConfig() (*Config, error) {
+	data, err := os.ReadFile("config/config.yaml")
+	if err != nil {
+		return nil, err
+	}
+	var config Config
+	if err := yaml.Unmarshal(data, &config); err != nil {
+		return nil, err
+	}
+	return &config, nil
+}
 
 type Pet struct {
 	ID         uint64
@@ -30,9 +47,18 @@ type Pet struct {
 }
 
 func main() {
+	// 加载配置
+	config, err := loadConfig()
+	if err != nil {
+		fmt.Println("❌ 加载配置失败:", err)
+		fmt.Println("请确保在项目根目录运行此脚本，且config/config.yaml文件存在")
+		return
+	}
+
 	// 连接数据库
-	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True",
-		DBUser, DBPassword, DBHost, DBPort, DBName)
+	mysql := config.Database.MySQL
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True",
+		mysql.Username, mysql.Password, mysql.Host, mysql.Port, mysql.Database)
 
 	db, err := sql.Open("mysql", dsn)
 	if err != nil {
@@ -45,7 +71,7 @@ func main() {
 		fmt.Println("❌ 数据库连接失败:", err)
 		return
 	}
-	fmt.Println("✅ 数据库连接成功")
+	fmt.Printf("✅ 数据库连接成功 (%s@%s:%d/%s)\n", mysql.Username, mysql.Host, mysql.Port, mysql.Database)
 
 	reader := bufio.NewReader(os.Stdin)
 
