@@ -50,11 +50,14 @@ export function PetManagement() {
 
   const updateMutation = useMutation({
     mutationFn: ({ id, data }: { id: number; data: Partial<Pet> }) =>
-      petApi.update(id, data),
+      adminApi.updatePet(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'all-pets'] })
       setEditingPet(null)
       setEditForm({})
+    },
+    onError: (error) => {
+      alert('更新失败: ' + (error instanceof Error ? error.message : '未知错误'))
     },
   })
 

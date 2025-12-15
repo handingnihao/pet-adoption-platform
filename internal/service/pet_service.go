@@ -51,6 +51,15 @@ return s.convertToResponse(pet), nil
 }
 
 func (s *PetService) UpdatePet(ctx context.Context, id, userID int64, req *model.PetUpdateRequest) error {
+	return s.updatePetInternal(ctx, id, userID, req, false)
+}
+
+// AdminUpdatePet 管理员更新宠物信息（不检查所有者）
+func (s *PetService) AdminUpdatePet(ctx context.Context, id int64, req *model.PetUpdateRequest) error {
+	return s.updatePetInternal(ctx, id, 0, req, true)
+}
+
+func (s *PetService) updatePetInternal(ctx context.Context, id, userID int64, req *model.PetUpdateRequest, isAdmin bool) error {
 pet, err := s.dao.GetByID(ctx, uint(id))
 if err != nil {
 if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -58,7 +67,7 @@ return errors.New("宠物不存在")
 }
 return fmt.Errorf("获取宠物失败: %w", err)
 }
-if pet.UserID != userID {
+if !isAdmin && pet.UserID != userID {
 return errors.New("无权编辑此宠物")
 }
 if req.Name != nil { pet.Name = *req.Name }

@@ -100,10 +100,11 @@ func InitRouter(db *gorm.DB, rdb *redis.Client) *gin.Engine {
 			petsAdmin := pets.Group("")
 			petsAdmin.Use(middleware.Auth(), middleware.AdminAuth())
 			{
-				petsAdmin.GET("/pending", petCtrl.GetPendingPets)   // 待审核列表
-				petsAdmin.PUT("/:id/approve", petCtrl.ApprovePet)   // 审核通过
-				petsAdmin.PUT("/:id/reject", petCtrl.RejectPet)     // 拒绝
-				petsAdmin.GET("/statistics", petCtrl.GetStatistics) // 统计信息
+				petsAdmin.GET("/pending", petCtrl.GetPendingPets)       // 待审核列表
+				petsAdmin.PUT("/:id/approve", petCtrl.ApprovePet)       // 审核通过
+				petsAdmin.PUT("/:id/reject", petCtrl.RejectPet)         // 拒绝
+				petsAdmin.PUT("/:id/admin", petCtrl.AdminUpdatePet)     // 管理员更新宠物
+				petsAdmin.GET("/statistics", petCtrl.GetStatistics)     // 统计信息
 			}
 		}
 

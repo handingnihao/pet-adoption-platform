@@ -22,6 +22,8 @@ export const adminApi = {
     api.put<unknown, ApiResponse>(`/pets/${id}/approve`),
   rejectPet: (id: number, reason?: string) =>
     api.put<unknown, ApiResponse>(`/pets/${id}/reject`, { reason }),
+  updatePet: (id: number, data: Partial<Pet>) =>
+    api.put<unknown, ApiResponse>(`/pets/${id}/admin`, data),
   getPetStatistics: () =>
     api.get<unknown, ApiResponse<PetStatistics>>('/pets/statistics'),
 

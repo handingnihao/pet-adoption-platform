@@ -106,6 +106,29 @@ func (c *PetController) DeletePet(ctx *gin.Context) {
 	response.Success(ctx, nil)
 }
 
+// AdminUpdatePet 管理员更新宠物信息
+func (c *PetController) AdminUpdatePet(ctx *gin.Context) {
+	idStr := ctx.Param("id")
+	id, err := strconv.ParseUint(idStr, 10, 32)
+	if err != nil {
+		response.ParamError(ctx, "无效的宠物ID")
+		return
+	}
+
+	var req model.PetUpdateRequest
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		response.ParamError(ctx, err.Error())
+		return
+	}
+
+	if err := c.service.AdminUpdatePet(ctx.Request.Context(), int64(id), &req); err != nil {
+		response.BadRequest(ctx, err.Error())
+		return
+	}
+
+	response.Success(ctx, nil)
+}
+
 func (c *PetController) ListPets(ctx *gin.Context) {
 	page, _ := strconv.Atoi(ctx.DefaultQuery("page", "1"))
 	pageSize, _ := strconv.Atoi(ctx.DefaultQuery("page_size", "20"))
