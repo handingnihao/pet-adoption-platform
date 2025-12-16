@@ -2,29 +2,7 @@ version: '3.8'
 
 services:
   # MySQL 数据库
-  mysql:
-    image: mysql:8.0
-    container_name: pet-adoption-mysql
-    restart: always
-    environment:
-      MYSQL_ROOT_PASSWORD: 123456
-      MYSQL_DATABASE: pet_adoption
-      MYSQL_USER: pet_admin
-      MYSQL_PASSWORD: pet_admin_password
-      TZ: Asia/Shanghai
-    ports:
-      - "3306:3306"
-    volumes:
-      - mysql_data:/var/lib/mysql
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
-    command: --default-authentication-plugin=mysql_native_password --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    networks:
-      - pet-network
+#使用本地数据库
 
   # Redis 缓存
   redis:
