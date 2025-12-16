@@ -175,3 +175,35 @@ func (s *OrganizationService) GetUserOrganizations(ctx context.Context, userID u
 
 	return s.orgDAO.ListByUserID(ctx, userID, page, pageSize)
 }
+
+// CreateOrganizationForRegistration 组织注册（创建待审核的组织）
+func (s *OrganizationService) CreateOrganizationForRegistration(ctx context.Context, org *model.Organization) error {
+	if org == nil {
+		return errors.New("organization cannot be nil")
+	}
+
+	// 检查机构名称是否已存在
+	exists, err := s.orgDAO.CheckNameExists(ctx, org.Name)
+	if err != nil {
+		logger.Error("检查机构名称是否存在失败", zap.Error(err))
+		return err
+	}
+	if exists {
+		return errors.New("机构名称已存在")
+	}
+
+	// 确保状态为待审核
+	org.Status = 0
+
+	// 创建机构
+	if err := s.orgDAO.Create(ctx, org); err != nil {
+		logger.Error("创建组织失败", zap.Error(err))
+		return err
+	}
+
+	logger.Info("组织注册申请已创建",
+		zap.String("name", org.Name),
+		zap.String("contact_name", org.ContactName))
+
+	return nil
+}
