@@ -37,9 +37,38 @@ func (s ApplicationStatus) String() string {
 	}
 }
 
-// MarshalJSON 自定义JSON序列化
+// MarshalJSON 自定义JSON序列化，将int转为string
 func (s ApplicationStatus) MarshalJSON() ([]byte, error) {
 	return []byte(`"` + s.String() + `"`), nil
+}
+
+// UnmarshalJSON 自定义JSON反序列化，将string转为int
+func (s *ApplicationStatus) UnmarshalJSON(data []byte) error {
+	str := string(data)
+	// 移除引号
+	if len(str) >= 2 && str[0] == '"' && str[len(str)-1] == '"' {
+		str = str[1 : len(str)-1]
+	}
+	
+	switch str {
+	case "pending":
+		*s = ApplicationStatusPending
+	case "reviewing":
+		*s = ApplicationStatusReviewing
+	case "interview":
+		*s = ApplicationStatusInterview
+	case "home_visit":
+		*s = ApplicationStatusHomeVisit
+	case "approved":
+		*s = ApplicationStatusApproved
+	case "rejected":
+		*s = ApplicationStatusRejected
+	case "cancelled":
+		*s = ApplicationStatusCancelled
+	default:
+		*s = ApplicationStatusPending
+	}
+	return nil
 }
 
 // HousingType 住房类型

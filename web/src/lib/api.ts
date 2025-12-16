@@ -240,7 +240,7 @@ export interface AdoptionApplication {
   adoption_reason: string
   how_to_care: string
   emergency_plan: string
-  status: string
+  status: string  // 后端通过MarshalJSON返回字符串格式
   reviewer_id?: number
   review_comment?: string
   rejection_reason?: string
