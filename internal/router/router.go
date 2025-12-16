@@ -29,6 +29,10 @@ func InitRouter(db *gorm.DB, rdb *redis.Client) *gin.Engine {
 	orgCtrl := controller.NewOrganizationController(db)
 	communityCtrl := controller.NewCommunityController(db)
 	donationCtrl := controller.NewDonationController(db)
+	uploadCtrl := controller.NewUploadController()
+
+	// 静态文件服务 - 用于访问上传的文件
+	r.Static("/uploads", "./uploads")
 
 	// 健康检查
 	r.GET("/health", func(c *gin.Context) {
@@ -230,13 +234,17 @@ func InitRouter(db *gorm.DB, rdb *redis.Client) *gin.Engine {
 			}
 		}
 
-		// 文件上传路由（未实现）
-		// files := v1.Group("/files")
-		// files.Use(middleware.Auth())
-		// {
-		// 	// files.POST("/image", controller.UploadImage)  // 上传图片
-		// 	// files.POST("/video", controller.UploadVideo)  // 上传视频
-		// }
+		// 文件上传路由
+		files := v1.Group("/files")
+		files.Use(middleware.Auth())
+		{
+			files.POST("/image", uploadCtrl.UploadImage)           // 上传单张图片
+			files.POST("/images", uploadCtrl.UploadImages)         // 批量上传图片
+			files.POST("/avatar", uploadCtrl.UploadAvatar)         // 上传头像
+			files.POST("/pet", uploadCtrl.UploadPetPhoto)          // 上传宠物图片
+			files.POST("/credential", uploadCtrl.UploadCredential) // 上传机构认证图片
+			files.DELETE("", uploadCtrl.DeleteFile)                // 删除文件
+		}
 
 		// 管理后台路由（未实现）
 		// admin := v1.Group("/admin")

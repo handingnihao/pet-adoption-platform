@@ -19,7 +19,17 @@ type Config struct {
 	OSS       OSSConfig       `mapstructure:"oss"`
 	SMS       SMSConfig       `mapstructure:"sms"`
 	Email     EmailConfig     `mapstructure:"email"`
+	Upload    UploadConfig    `mapstructure:"upload"`
 	RateLimit RateLimitConfig `mapstructure:"rate_limit"`
+}
+
+// UploadConfig 文件上传配置
+type UploadConfig struct {
+	StorageType string   `mapstructure:"storage_type"` // local or oss
+	LocalPath   string   `mapstructure:"local_path"`   // 本地存储路径
+	ServerURL   string   `mapstructure:"server_url"`   // 静态资源访问域名
+	MaxSize     int64    `mapstructure:"max_size"`     // 最大文件大小(MB)
+	AllowedExts []string `mapstructure:"allowed_exts"` // 允许的文件扩展名
 }
 
 // ServerConfig 服务器配置

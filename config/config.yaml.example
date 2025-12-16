@@ -65,3 +65,14 @@ rate_limit:
   enabled: true
   ip_limit: 10
   user_limit: 20
+
+upload:
+  storage_type: "local"
+  local_path: "./uploads"
+  server_url: "http://localhost:8080/uploads"
+  max_size: 5  # 5MB
+  allowed_exts:
+    - ".jpg"
+    - ".jpeg"
+    - ".png"
+    - ".gif"
