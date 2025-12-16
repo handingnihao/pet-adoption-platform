@@ -1,6 +1,8 @@
 package model
 
 import (
+	"database/sql/driver"
+	"fmt"
 	"time"
 )
 
@@ -33,6 +35,70 @@ const (
 	PetStatusAdopted   PetStatus = 2 // 已领养
 	PetStatusOffline   PetStatus = 3 // 已下架
 )
+
+// String 返回状态的字符串表示
+func (s PetStatus) String() string {
+	switch s {
+	case PetStatusPending:
+		return "pending"
+	case PetStatusAvailable:
+		return "available"
+	case PetStatusAdopted:
+		return "adopted"
+	case PetStatusOffline:
+		return "offline"
+	default:
+		return "unknown"
+	}
+}
+
+// MarshalJSON 自定义JSON序列化
+func (s PetStatus) MarshalJSON() ([]byte, error) {
+	return []byte(`"` + s.String() + `"`), nil
+}
+
+// Scan 实现 sql.Scanner 接口，支持从字符串或整数读取
+func (s *PetStatus) Scan(value interface{}) error {
+	if value == nil {
+		*s = PetStatusPending
+		return nil
+	}
+
+	switch v := value.(type) {
+	case int64:
+		*s = PetStatus(v)
+	case []uint8:
+		str := string(v)
+		return s.parseString(str)
+	case string:
+		return s.parseString(v)
+	default:
+		return fmt.Errorf("cannot scan type %T into PetStatus", value)
+	}
+	return nil
+}
+
+// parseString 解析字符串状态
+func (s *PetStatus) parseString(str string) error {
+	switch str {
+	case "pending", "0":
+		*s = PetStatusPending
+	case "available", "1":
+		*s = PetStatusAvailable
+	case "adopted", "approved", "2":
+		*s = PetStatusAdopted
+	case "offline", "3":
+		*s = PetStatusOffline
+	default:
+		return fmt.Errorf("unknown pet status string: %s", str)
+	}
+	return nil
+}
+
+// Value 实现 driver.Valuer 接口，写入数据库时转为整数
+func (s PetStatus) Value() (driver.Value, error) {
+	return int64(s), nil
+}
 
 // PetSize 宠物体型
 type PetSize string
