@@ -129,7 +129,7 @@ type AdoptionApplication struct {
 	AdditionalFiles string `json:"additional_files" gorm:"type:text;comment:其他附件(JSON)"`
 
 	// 审核流程
-	Status           ApplicationStatus `json:"status" gorm:"type:int;default:0;index;comment:状态"`
+	Status           ApplicationStatus `json:"status" gorm:"type:tinyint;default:0;index;comment:状态"`
 	ReviewerID       *int64            `json:"reviewer_id,omitempty" gorm:"comment:审核人ID"`
 	ReviewComment    string            `json:"review_comment" gorm:"type:text;comment:审核意见"`
 	InterviewTime    *time.Time        `json:"interview_time,omitempty" gorm:"comment:面试时间"`
