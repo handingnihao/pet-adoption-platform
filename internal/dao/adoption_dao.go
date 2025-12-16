@@ -169,7 +169,7 @@ func (d *AdoptionDAO) QueryApplications(ctx context.Context, query *model.Applic
 	db := d.db.WithContext(ctx).Model(&model.AdoptionApplication{})
 
 	// 状态过滤
-	if query.Status != "" {
+	if query.Status >= 0 {
 		db = db.Where("status = ?", query.Status)
 	}
 

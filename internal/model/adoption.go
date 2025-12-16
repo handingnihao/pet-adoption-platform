@@ -3,17 +3,44 @@ package model
 import "time"
 
 // ApplicationStatus 申请状态
-type ApplicationStatus string
+type ApplicationStatus int
 
 const (
-	ApplicationStatusPending    ApplicationStatus = "pending"     // 待审核
-	ApplicationStatusReviewing  ApplicationStatus = "reviewing"   // 审核中
-	ApplicationStatusInterview  ApplicationStatus = "interview"   // 待面试
-	ApplicationStatusHomeVisit  ApplicationStatus = "home_visit"  // 待家访
-	ApplicationStatusApproved   ApplicationStatus = "approved"    // 已通过
-	ApplicationStatusRejected   ApplicationStatus = "rejected"    // 已拒绝
-	ApplicationStatusCancelled  ApplicationStatus = "cancelled"   // 已取消
+	ApplicationStatusPending   ApplicationStatus = 0 // 待审核
+	ApplicationStatusReviewing ApplicationStatus = 1 // 审核中
+	ApplicationStatusInterview ApplicationStatus = 2 // 待面试
+	ApplicationStatusHomeVisit ApplicationStatus = 3 // 待家访
+	ApplicationStatusApproved  ApplicationStatus = 4 // 已通过
+	ApplicationStatusRejected  ApplicationStatus = 5 // 已拒绝
+	ApplicationStatusCancelled ApplicationStatus = 6 // 已取消
 )
+
+// String 返回状态的字符串表示
+func (s ApplicationStatus) String() string {
+	switch s {
+	case ApplicationStatusPending:
+		return "pending"
+	case ApplicationStatusReviewing:
+		return "reviewing"
+	case ApplicationStatusInterview:
+		return "interview"
+	case ApplicationStatusHomeVisit:
+		return "home_visit"
+	case ApplicationStatusApproved:
+		return "approved"
+	case ApplicationStatusRejected:
+		return "rejected"
+	case ApplicationStatusCancelled:
+		return "cancelled"
+	default:
+		return "unknown"
+	}
+}
+
+// MarshalJSON 自定义JSON序列化
+func (s ApplicationStatus) MarshalJSON() ([]byte, error) {
+	return []byte(`"` + s.String() + `"`), nil
+}
 
 // HousingType 住房类型
 type HousingType string
@@ -73,7 +100,7 @@ type AdoptionApplication struct {
 	AdditionalFiles string `json:"additional_files" gorm:"type:text;comment:其他附件(JSON)"`
 
 	// 审核流程
-	Status           ApplicationStatus `json:"status" gorm:"size:20;default:pending;index;comment:状态"`
+	Status           ApplicationStatus `json:"status" gorm:"type:int;default:0;index;comment:状态"`
 	ReviewerID       *int64            `json:"reviewer_id,omitempty" gorm:"comment:审核人ID"`
 	ReviewComment    string            `json:"review_comment" gorm:"type:text;comment:审核意见"`
 	InterviewTime    *time.Time        `json:"interview_time,omitempty" gorm:"comment:面试时间"`
