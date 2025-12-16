@@ -63,6 +63,10 @@ export const userApi = {
     api.post<unknown, ApiResponse<{ token: string; user: User }>>('/users/login', data),
   register: (data: { username: string; password: string; email?: string; phone?: string }) =>
     api.post<unknown, ApiResponse>('/users/register', data),
+  registerOrganization: (data: FormData) =>
+    api.post<unknown, ApiResponse>('/organizations/register', data, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    }),
   getProfile: () => api.get<unknown, ApiResponse<User>>('/users/profile'),
   updateProfile: (data: Partial<User>) =>
     api.put<unknown, ApiResponse>('/users/profile', data),

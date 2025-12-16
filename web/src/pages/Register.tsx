@@ -1,10 +1,12 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { PawPrint, Eye, EyeOff, CheckCircle, XCircle } from 'lucide-react'
+import { PawPrint, Eye, EyeOff, CheckCircle, XCircle, Upload, X } from 'lucide-react'
 import { Button } from '../components/ui/button'
 import { Input } from '../components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card'
 import { useAuthStore } from '../store/auth'
+import { userApi } from '../lib/api'
+import { useMutation } from '@tanstack/react-query'
 
 // 手机号正则：中国大陆手机号
 const PHONE_REGEX = /^1[3-9]\d{9}$/
@@ -22,12 +24,25 @@ const PASSWORD_RULES = {
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 export function Register() {
+  const [userType, setUserType] = useState<'user' | 'organization'>('user')
   const [formData, setFormData] = useState({
     username: '',
     password: '',
     confirmPassword: '',
     email: '',
     phone: '',
+  })
+  const [orgFormData, setOrgFormData] = useState({
+    name: '',
+    type: 'shelter',
+    contact_name: '',
+    contact_phone: '',
+    contact_email: '',
+    description: '',
+    province: '',
+    city: '',
+    address: '',
+    credentials: [] as File[],
   })
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -36,6 +51,32 @@ export function Register() {
 
   const { register } = useAuthStore()
   const navigate = useNavigate()
+
+  const registerOrgMutation = useMutation({
+    mutationFn: async (data: typeof orgFormData) => {
+      const formDataObj = new FormData()
+      formDataObj.append('name', data.name)
+      formDataObj.append('type', data.type)
+      formDataObj.append('contact_name', data.contact_name)
+      formDataObj.append('contact_phone', data.contact_phone)
+      formDataObj.append('contact_email', data.contact_email)
+      formDataObj.append('description', data.description)
+      formDataObj.append('province', data.province)
+      formDataObj.append('city', data.city)
+      formDataObj.append('address', data.address)
+      data.credentials.forEach((file) => {
+        formDataObj.append('credentials', file)
+      })
+      return userApi.registerOrganization(formDataObj)
+    },
+    onSuccess: () => {
+      alert('组织注册申请已提交，请等待管理员审核')
+      navigate('/login', { state: { message: '组织注册申请已提交，请等待审核后登录' } })
+    },
+    onError: (error: Error) => {
+      setError(error.message)
+    },
+  })
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -128,6 +169,51 @@ export function Register() {
     }
   }
 
+  const handleAddCredential = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      setOrgFormData({
+        ...orgFormData,
+        credentials: [...orgFormData.credentials, ...Array.from(e.target.files)],
+      })
+    }
+  }
+
+  const handleRemoveCredential = (index: number) => {
+    setOrgFormData({
+      ...orgFormData,
+      credentials: orgFormData.credentials.filter((_, i) => i !== index),
+    })
+  }
+
+  const handleOrgSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setError('')
+
+    if (!orgFormData.name.trim()) {
+      setError('请输入组织名称')
+      return
+    }
+    if (!orgFormData.contact_name.trim()) {
+      setError('请输入联系人姓名')
+      return
+    }
+    if (!orgFormData.contact_phone.trim() || !PHONE_REGEX.test(orgFormData.contact_phone)) {
+      setError('请输入有效的联系电话')
+      return
+    }
+    if (orgFormData.credentials.length === 0) {
+      setError('请至少上传一张资历证明图片')
+      return
+    }
+
+    setLoading(true)
+    try {
+      await registerOrgMutation.mutateAsync(orgFormData)
+    } finally {
+      setLoading(false)
+    }
+  }
+
   return (
     <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center py-12 px-4">
       <Card className="w-full max-w-md">
@@ -136,10 +222,33 @@ export function Register() {
             <PawPrint className="h-12 w-12 text-primary" />
           </div>
           <CardTitle className="text-2xl">创建账号</CardTitle>
-          <CardDescription>加入我们，开启您的领养之旅</CardDescription>
+          <CardDescription>
+            {userType === 'user' ? '加入我们，开启您的领养之旅' : '申请成为合作机构'}
+          </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
+          {/* 用户类型选择 */}
+          <div className="flex gap-2 mb-6">
+            <Button
+              type="button"
+              variant={userType === 'user' ? 'default' : 'outline'}
+              className="flex-1"
+              onClick={() => setUserType('user')}
+            >
+              个人用户
+            </Button>
+            <Button
+              type="button"
+              variant={userType === 'organization' ? 'default' : 'outline'}
+              className="flex-1"
+              onClick={() => setUserType('organization')}
+            >
+              组织机构
+            </Button>
+          </div>
+
+          {userType === 'user' ? (
+            <form onSubmit={handleSubmit} className="space-y-4">
             {error && (
               <div className="p-3 text-sm text-destructive bg-destructive/10 rounded-md">
                 {error}
@@ -249,7 +358,154 @@ export function Register() {
                 立即登录
               </Link>
             </div>
-          </form>
+            </form>
+          ) : (
+            <form onSubmit={handleOrgSubmit} className="space-y-4">
+              {error && (
+                <div className="p-3 text-sm text-destructive bg-destructive/10 rounded-md">
+                  {error}
+                </div>
+              )}
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium">组织名称 *</label>
+                <Input
+                  placeholder="请输入组织全称"
+                  value={orgFormData.name}
+                  onChange={(e) => setOrgFormData({ ...orgFormData, name: e.target.value })}
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium">组织类型 *</label>
+                <select
+                  className="w-full h-10 px-3 border rounded-md text-sm"
+                  value={orgFormData.type}
+                  onChange={(e) => setOrgFormData({ ...orgFormData, type: e.target.value })}
+                >
+                  <option value="shelter">动物收容所</option>
+                  <option value="rescue">救助站</option>
+                  <option value="hospital">宠物医院</option>
+                  <option value="association">动物保护协会</option>
+                  <option value="other">其他</option>
+                </select>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium">联系人姓名 *</label>
+                <Input
+                  placeholder="请输入联系人姓名"
+                  value={orgFormData.contact_name}
+                  onChange={(e) => setOrgFormData({ ...orgFormData, contact_name: e.target.value })}
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium">联系电话 *</label>
+                <Input
+                  placeholder="请输入联系电话"
+                  value={orgFormData.contact_phone}
+                  onChange={(e) => setOrgFormData({ ...orgFormData, contact_phone: e.target.value })}
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium">联系邮箱</label>
+                <Input
+                  type="email"
+                  placeholder="请输入联系邮箱"
+                  value={orgFormData.contact_email}
+                  onChange={(e) => setOrgFormData({ ...orgFormData, contact_email: e.target.value })}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium">组织简介</label>
+                <textarea
+                  className="w-full min-h-[80px] p-3 border rounded-md text-sm"
+                  placeholder="请简要介绍您的组织"
+                  value={orgFormData.description}
+                  onChange={(e) => setOrgFormData({ ...orgFormData, description: e.target.value })}
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">省份</label>
+                  <Input
+                    placeholder="如：广东省"
+                    value={orgFormData.province}
+                    onChange={(e) => setOrgFormData({ ...orgFormData, province: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">城市</label>
+                  <Input
+                    placeholder="如：广州市"
+                    value={orgFormData.city}
+                    onChange={(e) => setOrgFormData({ ...orgFormData, city: e.target.value })}
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium">详细地址</label>
+                <Input
+                  placeholder="请输入详细地址"
+                  value={orgFormData.address}
+                  onChange={(e) => setOrgFormData({ ...orgFormData, address: e.target.value })}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium">资历证明图片 * (至少1张)</label>
+                <div className="border-2 border-dashed rounded-lg p-4 text-center cursor-pointer hover:bg-muted/50">
+                  <input
+                    type="file"
+                    multiple
+                    accept="image/*"
+                    onChange={handleAddCredential}
+                    className="hidden"
+                    id="credentials-upload"
+                  />
+                  <label htmlFor="credentials-upload" className="cursor-pointer">
+                    <Upload className="h-6 w-6 mx-auto mb-2 text-muted-foreground" />
+                    <p className="text-sm text-muted-foreground">点击上传或拖拽图片</p>
+                  </label>
+                </div>
+                {orgFormData.credentials.length > 0 && (
+                  <div className="space-y-2">
+                    {orgFormData.credentials.map((file, index) => (
+                      <div key={index} className="flex items-center justify-between p-2 bg-muted rounded">
+                        <span className="text-sm truncate">{file.name}</span>
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveCredential(index)}
+                          className="text-destructive hover:text-destructive/80"
+                        >
+                          <X className="h-4 w-4" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <Button type="submit" className="w-full" disabled={loading || registerOrgMutation.isPending}>
+                {loading || registerOrgMutation.isPending ? '提交中...' : '提交申请'}
+              </Button>
+
+              <div className="text-center text-sm text-muted-foreground">
+                已有账号？{' '}
+                <Link to="/login" className="text-primary hover:underline">
+                  立即登录
+                </Link>
+              </div>
+            </form>
+          )}
         </CardContent>
       </Card>
     </div>

@@ -154,6 +154,7 @@ func InitRouter(db *gorm.DB, rdb *redis.Client) *gin.Engine {
 			// 公开接口（无需登录）
 			organizations.GET("", orgCtrl.ListOrganizations)       // 机构列表
 			organizations.GET("/:id", orgCtrl.GetOrganization)     // 机构详情
+			organizations.POST("/register", orgCtrl.RegisterOrganization) // 组织注册
 
 			// 需要登录的接口
 			orgsAuth := organizations.Group("")

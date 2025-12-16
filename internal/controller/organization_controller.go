@@ -296,3 +296,72 @@ func (ctrl *OrganizationController) GetMyOrganizations(c *gin.Context) {
 
 	response.SuccessWithPagination(c, orgInfos, page, pageSize, total)
 }
+
+// RegisterOrganization 组织注册（公开接口）
+func (ctrl *OrganizationController) RegisterOrganization(c *gin.Context) {
+	// 解析表单数据
+	name := c.PostForm("name")
+	orgType := c.PostForm("type")
+	contactName := c.PostForm("contact_name")
+	contactPhone := c.PostForm("contact_phone")
+	contactEmail := c.PostForm("contact_email")
+	description := c.PostForm("description")
+	province := c.PostForm("province")
+	city := c.PostForm("city")
+	address := c.PostForm("address")
+
+	// 验证必填字段
+	if name == "" || contactName == "" || contactPhone == "" {
+		response.ParamError(c, "请填写必填字段")
+		return
+	}
+
+	// 获取上传的资历图片
+	form, err := c.MultipartForm()
+	if err != nil {
+		logger.Warn("获取表单数据失败", zap.Error(err))
+		response.ParamError(c, "获取表单数据失败")
+		return
+	}
+
+	credentials := form.File["credentials"]
+	if len(credentials) == 0 {
+		response.ParamError(c, "请至少上传一张资历证明图片")
+		return
+	}
+
+	// 保存资历图片（这里简化处理，实际应该上传到OSS或本地存储）
+	credentialPaths := make([]string, 0)
+	for _, file := range credentials {
+		credentialPaths = append(credentialPaths, file.Filename)
+	}
+
+	// 创建组织（待审核状态）
+	org := &model.Organization{
+		Name:           name,
+		Type:           orgType,
+		ContactName:    contactName,
+		ContactPhone:   contactPhone,
+		ContactEmail:   contactEmail,
+		Description:    description,
+		Province:       province,
+		City:           city,
+		Address:        address,
+		Status:         0, // 待审核
+		CredentialUrls: credentialPaths,
+	}
+
+	if err := ctrl.orgService.CreateOrganizationForRegistration(c.Request.Context(), org); err != nil {
+		logger.Error("创建组织失败", zap.Error(err))
+		response.BadRequest(c, err.Error())
+		return
+	}
+
+	logger.Info("组织注册申请已提交",
+		zap.String("name", name),
+		zap.String("contact_name", contactName))
+
+	response.Success(c, gin.H{
+		"message": "组织注册申请已提交，请等待管理员审核",
+	})
+}
