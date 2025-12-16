@@ -18,20 +18,27 @@ const (
 
 // Organization 机构模型
 type Organization struct {
-	ID          uint64            `json:"id" gorm:"primaryKey;autoIncrement;comment:机构ID"`
-	Name        string            `json:"name" gorm:"size:100;not null;comment:机构名称"`
-	Logo        string            `json:"logo" gorm:"size:255;comment:机构logo"`
-	Description string            `json:"description" gorm:"type:text;comment:机构描述"`
-	Address     string            `json:"address" gorm:"size:255;comment:机构地址"`
-	Phone       string            `json:"phone" gorm:"size:20;comment:联系电话"`
-	Email       string            `json:"email" gorm:"size:100;comment:联系邮箱"`
-	Status      OrganizationStatus `json:"status" gorm:"default:0;comment:状态(0:待审核 1:已通过 2:已拒绝)"`
-	RejectReason string           `json:"reject_reason" gorm:"size:255;comment:拒绝原因"`
-	CreatedBy   uint64            `json:"created_by" gorm:"not null;comment:创建人ID"`
-	UpdatedBy   uint64            `json:"updated_by" gorm:"comment:更新人ID"`
-	CreatedAt   time.Time         `json:"created_at" gorm:"autoCreateTime;comment:创建时间"`
-	UpdatedAt   time.Time         `json:"updated_at" gorm:"autoUpdateTime;comment:更新时间"`
-	DeletedAt   *time.Time        `json:"deleted_at" gorm:"index;comment:删除时间"`
+	ID             uint64             `json:"id" gorm:"primaryKey;autoIncrement;comment:机构ID"`
+	Name           string             `json:"name" gorm:"size:100;not null;comment:机构名称"`
+	Type           string             `json:"type" gorm:"size:50;comment:机构类型"`
+	Logo           string             `json:"logo" gorm:"size:255;comment:机构logo"`
+	Description    string             `json:"description" gorm:"type:text;comment:机构描述"`
+	Province       string             `json:"province" gorm:"size:50;comment:省份"`
+	City           string             `json:"city" gorm:"size:50;comment:城市"`
+	Address        string             `json:"address" gorm:"size:255;comment:机构地址"`
+	ContactName    string             `json:"contact_name" gorm:"size:50;comment:联系人姓名"`
+	ContactPhone   string             `json:"contact_phone" gorm:"size:20;comment:联系人电话"`
+	ContactEmail   string             `json:"contact_email" gorm:"size:100;comment:联系人邮箱"`
+	Phone          string             `json:"phone" gorm:"size:20;comment:联系电话"`
+	Email          string             `json:"email" gorm:"size:100;comment:联系邮箱"`
+	CredentialUrls []string           `json:"credential_urls" gorm:"type:json;serializer:json;comment:资历证明图片"`
+	Status         OrganizationStatus `json:"status" gorm:"default:0;comment:状态(0:待审核 1:已通过 2:已拒绝)"`
+	RejectReason   string             `json:"reject_reason" gorm:"size:255;comment:拒绝原因"`
+	CreatedBy      uint64             `json:"created_by" gorm:"comment:创建人ID"`
+	UpdatedBy      uint64             `json:"updated_by" gorm:"comment:更新人ID"`
+	CreatedAt      time.Time          `json:"created_at" gorm:"autoCreateTime;comment:创建时间"`
+	UpdatedAt      time.Time          `json:"updated_at" gorm:"autoUpdateTime;comment:更新时间"`
+	DeletedAt      *time.Time         `json:"deleted_at" gorm:"index;comment:删除时间"`
 }
 
 // TableName 指定表名
