@@ -104,16 +104,6 @@ export function Login() {
 
           <div className="mt-6">
             <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-background px-2 text-muted-foreground">测试账号</span>
-              </div>
-            </div>
-            <div className="mt-4 text-center text-sm text-muted-foreground">
-              <p>管理员: admin / Test@123456</p>
-              <p>普通用户: testuser / Test@123456</p>
             </div>
           </div>
         </CardContent>
