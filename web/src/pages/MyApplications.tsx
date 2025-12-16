@@ -27,7 +27,12 @@ export function MyApplications() {
 
   const { data, isLoading } = useQuery({
     queryKey: ['my-applications'],
-    queryFn: () => adoptionApi.getMyApplications({ page: 1, page_size: 50 }),
+    queryFn: async () => {
+      const result = await adoptionApi.getMyApplications({ page: 1, page_size: 50 })
+      console.log('我的申请API返回:', result)
+      console.log('申请列表数据:', result?.data)
+      return result
+    },
     enabled: isAuthenticated,
   })
 

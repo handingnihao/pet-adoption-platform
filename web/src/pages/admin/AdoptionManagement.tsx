@@ -31,22 +31,27 @@ export function AdoptionManagement() {
 
   const { data, isLoading } = useQuery({
     queryKey: ['admin', 'applications', statusFilter, page],
-    queryFn: () => {
+    queryFn: async () => {
+      let result
       if (statusFilter === 'pending') {
-        return adminApi.getPendingApplications({ page, page_size: 10 })
+        result = await adminApi.getPendingApplications({ page, page_size: 10 })
+      } else {
+        // 将字符串状态映射为数字
+        const statusMap: Record<string, number> = {
+          'pending': 0,
+          'approved': 1,
+          'rejected': 2,
+        }
+        const numericStatus = statusFilter !== 'all' ? statusMap[statusFilter] : undefined
+        result = await adminApi.getAllApplications({ 
+          page, 
+          page_size: 10,
+          status: numericStatus
+        })
       }
-      // 将字符串状态映射为数字
-      const statusMap: Record<string, number> = {
-        'pending': 0,
-        'approved': 1,
-        'rejected': 2,
-      }
-      const numericStatus = statusFilter !== 'all' ? statusMap[statusFilter] : undefined
-      return adminApi.getAllApplications({ 
-        page, 
-        page_size: 10,
-        status: numericStatus
-      })
+      console.log('管理后台申请列表API返回:', result)
+      console.log('申请数据:', result?.data)
+      return result
     },
   })
 
