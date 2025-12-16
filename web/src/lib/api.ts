@@ -234,10 +234,20 @@ export interface AdoptionApplication {
 
 export interface AdoptionApplicationRequest {
   pet_id: number
-  reason: string
-  experience?: string
-  living_condition?: string
-  family_agreement?: boolean
+  organization_id: number
+  applicant_name: string
+  applicant_phone: string
+  applicant_address: string
+  housing_type: 'apartment' | 'house' | 'villa' | 'other'
+  housing_area: number
+  has_yard?: boolean
+  family_members: number
+  has_children?: boolean
+  children_age?: string
+  family_agree: boolean
+  adoption_reason: string
+  how_to_care: string
+  emergency_plan: string
 }
 
 export interface AdoptionRecord {
