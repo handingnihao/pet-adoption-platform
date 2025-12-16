@@ -16,6 +16,10 @@ import { PostDetail } from '../pages/PostDetail'
 import { CreatePost } from '../pages/CreatePost'
 import { Guide } from '../pages/Guide'
 import { About } from '../pages/About'
+import { Donate } from '../pages/Donate'
+import { MyDonations } from '../pages/MyDonations'
+import { OrganizationApply } from '../pages/OrganizationApply'
+import { MyOrganizations } from '../pages/MyOrganizations'
 import { AdminDashboard } from '../pages/admin/Dashboard'
 import { UserManagement } from '../pages/admin/UserManagement'
 import { PetManagement } from '../pages/admin/PetManagement'
@@ -42,6 +46,10 @@ export const router = createBrowserRouter([
       { path: 'community/:id', element: <PostDetail /> },
       { path: 'guide', element: <Guide /> },
       { path: 'about', element: <About /> },
+      { path: 'donate', element: <Donate /> },
+      { path: 'my-donations', element: <MyDonations /> },
+      { path: 'organizations/apply', element: <OrganizationApply /> },
+      { path: 'my-organizations', element: <MyOrganizations /> },
     ],
   },
   {

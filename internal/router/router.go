@@ -28,6 +28,7 @@ func InitRouter(db *gorm.DB, rdb *redis.Client) *gin.Engine {
 	adoptionCtrl := controller.NewAdoptionController(db)
 	orgCtrl := controller.NewOrganizationController(db)
 	communityCtrl := controller.NewCommunityController(db)
+	donationCtrl := controller.NewDonationController(db)
 
 	// 健康检查
 	r.GET("/health", func(c *gin.Context) {
@@ -201,14 +202,32 @@ func InitRouter(db *gorm.DB, rdb *redis.Client) *gin.Engine {
 			}
 		}
 
-		// 捐赠相关路由（未实现）
-		// donations := v1.Group("/donations")
-		// donations.Use(middleware.Auth())
-		// {
-		// 	// donations.POST("", controller.CreateDonation)      // 创建捐赠
-		// 	// donations.GET("", controller.GetDonationList)      // 捐赠列表
-		// 	// donations.POST("/:id/pay", controller.PayDonation) // 支付捐赠
-		// }
+		// 捐赠相关路由
+		donations := v1.Group("/donations")
+		{
+			// 公开接口
+			donations.GET("/public", donationCtrl.GetPublicDonations) // 爱心墙（公开捐赠列表）
+			donations.GET("/statistics", donationCtrl.GetStatistics)  // 捐赠统计
+
+			// 需要登录的接口
+			donationsAuth := donations.Group("")
+			donationsAuth.Use(middleware.Auth())
+			{
+				donationsAuth.POST("", donationCtrl.CreateDonation)           // 创建捐赠
+				donationsAuth.GET("/my", donationCtrl.GetMyDonations)         // 我的捐赠记录
+				donationsAuth.GET("/:id", donationCtrl.GetDonation)           // 捐赠详情
+				donationsAuth.POST("/:id/confirm", donationCtrl.ConfirmDonation) // 确认捐赠
+				donationsAuth.DELETE("/:id", donationCtrl.CancelDonation)     // 取消捐赠
+			}
+
+			// 管理员接口
+			donationsAdmin := donations.Group("")
+			donationsAdmin.Use(middleware.Auth(), middleware.AdminAuth())
+			{
+				donationsAdmin.GET("", donationCtrl.ListDonations)              // 捐赠列表（管理员）
+				donationsAdmin.PUT("/:id/complete", donationCtrl.CompleteDonation) // 完成捐赠
+			}
+		}
 
 		// 文件上传路由（未实现）
 		// files := v1.Group("/files")

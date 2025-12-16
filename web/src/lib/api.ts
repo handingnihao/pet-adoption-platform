@@ -327,3 +327,71 @@ export interface OrganizationCreateRequest {
   district?: string
   address?: string
 }
+
+// 捐赠相关类型
+export type DonationType = 'money' | 'supply' | 'service'
+export type DonationStatus = 0 | 1 | 2 | 3 // 0待确认 1已确认 2已完成 3已取消
+
+export interface Donation {
+  id: number
+  user_id: number
+  username: string
+  user_avatar: string
+  organization_id?: number
+  organization_name?: string
+  type: DonationType
+  amount: number
+  supply_items: string[]
+  service_desc: string
+  message: string
+  is_anonymous: boolean
+  status: DonationStatus
+  status_text: string
+  created_at: string
+}
+
+export interface DonationCreateRequest {
+  organization_id?: number
+  type: DonationType
+  amount?: number
+  supply_items?: string[]
+  service_desc?: string
+  message?: string
+  is_anonymous?: boolean
+  payment_method?: string
+}
+
+export interface DonationStatistics {
+  total_donations: number
+  total_amount: number
+  total_donors: number
+  monthly_donations: number
+  monthly_amount: number
+}
+
+// 捐赠相关 API
+export const donationApi = {
+  // 公开接口
+  getPublicDonations: (limit?: number) =>
+    api.get<unknown, ApiResponse<Donation[]>>('/donations/public', { params: { limit } }),
+  getStatistics: () =>
+    api.get<unknown, ApiResponse<DonationStatistics>>('/donations/statistics'),
+  
+  // 需要登录
+  create: (data: DonationCreateRequest) =>
+    api.post<unknown, ApiResponse<Donation>>('/donations', data),
+  getMyDonations: (params?: { page?: number; page_size?: number }) =>
+    api.get<unknown, ApiResponse<PageResponse<Donation>>>('/donations/my', { params }),
+  getById: (id: number) =>
+    api.get<unknown, ApiResponse<Donation>>(`/donations/${id}`),
+  confirm: (id: number, transactionId?: string) =>
+    api.post<unknown, ApiResponse>(`/donations/${id}/confirm`, { transaction_id: transactionId }),
+  cancel: (id: number) =>
+    api.delete<unknown, ApiResponse>(`/donations/${id}`),
+  
+  // 管理员接口
+  list: (params?: { page?: number; page_size?: number; type?: string; status?: number }) =>
+    api.get<unknown, ApiResponse<PageResponse<Donation>>>('/donations', { params }),
+  complete: (id: number) =>
+    api.put<unknown, ApiResponse>(`/donations/${id}/complete`),
+}

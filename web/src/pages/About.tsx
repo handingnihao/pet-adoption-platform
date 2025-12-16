@@ -38,6 +38,16 @@ const milestones = [
 ]
 
 export function About() {
+  const handleEmailClick = () => {
+    const email = 'tyumaoo@qq.com'
+    // 复制到剪贴板
+    navigator.clipboard.writeText(email).then(() => {
+      alert(`联系邮箱：${email}\n已复制到剪贴板`)
+    }).catch(() => {
+      alert(`联系邮箱：${email}`)
+    })
+  }
+
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
@@ -202,13 +212,13 @@ export function About() {
             </p>
             
             <div className="flex flex-wrap justify-center gap-4">
-              <a
-                href="mailto:contact@example.com"
+              <button
+                onClick={handleEmailClick}
                 className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
               >
                 <Mail className="w-5 h-5" />
                 邮箱联系
-              </a>
+              </button>
               <a
                 href="https://gitee.com/olrain/pet-adoption-platform"
                 target="_blank"
