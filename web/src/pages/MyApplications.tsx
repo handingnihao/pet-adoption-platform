@@ -8,9 +8,13 @@ import type { AdoptionApplication } from '../lib/api'
 import { useAuthStore } from '../store/auth'
 
 const statusConfig = {
-  0: { label: '待审核', icon: Clock, color: 'text-yellow-500', bg: 'bg-yellow-50' },
-  1: { label: '已通过', icon: CheckCircle, color: 'text-green-500', bg: 'bg-green-50' },
-  2: { label: '已拒绝', icon: XCircle, color: 'text-red-500', bg: 'bg-red-50' },
+  'pending': { label: '待审核', icon: Clock, color: 'text-yellow-500', bg: 'bg-yellow-50' },
+  'reviewing': { label: '审核中', icon: Clock, color: 'text-blue-500', bg: 'bg-blue-50' },
+  'interview': { label: '待面试', icon: Clock, color: 'text-purple-500', bg: 'bg-purple-50' },
+  'home_visit': { label: '待家访', icon: Clock, color: 'text-indigo-500', bg: 'bg-indigo-50' },
+  'approved': { label: '已通过', icon: CheckCircle, color: 'text-green-500', bg: 'bg-green-50' },
+  'rejected': { label: '已拒绝', icon: XCircle, color: 'text-red-500', bg: 'bg-red-50' },
+  'cancelled': { label: '已取消', icon: XCircle, color: 'text-gray-500', bg: 'bg-gray-50' },
 }
 
 export function MyApplications() {
@@ -77,7 +81,7 @@ export function MyApplications() {
       ) : (
         <div className="space-y-4">
           {applications.map((app: AdoptionApplication) => {
-            const status = statusConfig[app.status as keyof typeof statusConfig] || statusConfig[0]
+            const status = statusConfig[app.status as keyof typeof statusConfig] || statusConfig['pending']
             const StatusIcon = status.icon
 
             return (
@@ -119,16 +123,24 @@ export function MyApplications() {
                         </div>
                       </div>
 
-                      <p className="text-sm text-muted-foreground mt-2 line-clamp-2">
-                        申请理由：{app.reason}
-                      </p>
+                      <div className="mt-2 space-y-1">
+                        <p className="text-sm text-muted-foreground line-clamp-2">
+                          <span className="font-medium">申请人：</span>{app.applicant_name} · {app.applicant_phone}
+                        </p>
+                        <p className="text-sm text-muted-foreground line-clamp-2">
+                          <span className="font-medium">领养理由：</span>{app.adoption_reason}
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          <span className="font-medium">申请编号：</span>{app.application_no}
+                        </p>
+                      </div>
 
                       <div className="flex items-center justify-between mt-3">
                         <span className="text-xs text-muted-foreground">
                           申请时间：{new Date(app.created_at).toLocaleDateString()}
                         </span>
 
-                        {app.status === 0 && (
+                        {app.status === 'pending' && (
                           <Button
                             variant="ghost"
                             size="sm"

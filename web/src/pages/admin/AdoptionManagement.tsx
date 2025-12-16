@@ -7,20 +7,24 @@ import { adminApi } from '../../lib/adminApi'
 import type { AdoptionApplication } from '../../lib/api'
 
 const statusTabs = [
-  { value: -1, label: '全部' },
-  { value: 0, label: '待审核' },
-  { value: 1, label: '已通过' },
-  { value: 2, label: '已拒绝' },
+  { value: 'all', label: '全部' },
+  { value: 'pending', label: '待审核' },
+  { value: 'approved', label: '已通过' },
+  { value: 'rejected', label: '已拒绝' },
 ]
 
 const statusConfig = {
-  0: { label: '待审核', icon: Clock, color: 'text-yellow-500', bg: 'bg-yellow-50' },
-  1: { label: '已通过', icon: CheckCircle, color: 'text-green-500', bg: 'bg-green-50' },
-  2: { label: '已拒绝', icon: XCircle, color: 'text-red-500', bg: 'bg-red-50' },
+  'pending': { label: '待审核', icon: Clock, color: 'text-yellow-500', bg: 'bg-yellow-50' },
+  'reviewing': { label: '审核中', icon: Clock, color: 'text-blue-500', bg: 'bg-blue-50' },
+  'interview': { label: '待面试', icon: Clock, color: 'text-purple-500', bg: 'bg-purple-50' },
+  'home_visit': { label: '待家访', icon: Clock, color: 'text-indigo-500', bg: 'bg-indigo-50' },
+  'approved': { label: '已通过', icon: CheckCircle, color: 'text-green-500', bg: 'bg-green-50' },
+  'rejected': { label: '已拒绝', icon: XCircle, color: 'text-red-500', bg: 'bg-red-50' },
+  'cancelled': { label: '已取消', icon: XCircle, color: 'text-gray-500', bg: 'bg-gray-50' },
 }
 
 export function AdoptionManagement() {
-  const [statusFilter, setStatusFilter] = useState(-1)
+  const [statusFilter, setStatusFilter] = useState<string>('all')
   const [page, setPage] = useState(1)
   const [selectedApp, setSelectedApp] = useState<AdoptionApplication | null>(null)
   const queryClient = useQueryClient()
@@ -28,20 +32,20 @@ export function AdoptionManagement() {
   const { data, isLoading } = useQuery({
     queryKey: ['admin', 'applications', statusFilter, page],
     queryFn: () => {
-      if (statusFilter === 0) {
+      if (statusFilter === 'pending') {
         return adminApi.getPendingApplications({ page, page_size: 10 })
       }
       return adminApi.getAllApplications({ 
         page, 
         page_size: 10,
-        status: statusFilter >= 0 ? statusFilter : undefined
+        status: statusFilter !== 'all' ? statusFilter : undefined
       })
     },
   })
 
   const reviewMutation = useMutation({
-    mutationFn: ({ id, status }: { id: number; status: number }) =>
-      adminApi.reviewApplication(id, { status }),
+    mutationFn: ({ id, action }: { id: number; action: string }) =>
+      adminApi.reviewApplication(id, { action, comment: '', reason: '' }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'applications'] })
       queryClient.invalidateQueries({ queryKey: ['admin', 'adoption-statistics'] })
@@ -55,13 +59,14 @@ export function AdoptionManagement() {
 
   const handleApprove = (app: AdoptionApplication) => {
     if (confirm('确定要通过这个领养申请吗？')) {
-      reviewMutation.mutate({ id: app.id, status: 1 })
+      reviewMutation.mutate({ id: app.id, action: 'approve' })
     }
   }
 
   const handleReject = (app: AdoptionApplication) => {
-    if (confirm('确定要拒绝这个领养申请吗？')) {
-      reviewMutation.mutate({ id: app.id, status: 2 })
+    const reason = prompt('请输入拒绝原因：')
+    if (reason) {
+      reviewMutation.mutate({ id: app.id, action: 'reject' })
     }
   }
 
@@ -139,7 +144,7 @@ export function AdoptionManagement() {
                             {new Date(app.created_at).toLocaleString()}
                           </p>
                         </div>
-                        {app.status === 0 && (
+                        {app.status === 'pending' && (
                           <div className="flex items-center gap-2">
                             <Button
                               size="sm"
@@ -206,34 +211,62 @@ export function AdoptionManagement() {
                   </div>
 
                   <div>
-                    <h4 className="font-medium mb-2">领养原因</h4>
-                    <p className="text-sm bg-muted p-3 rounded-lg">{selectedApp.reason}</p>
+                    <h4 className="font-medium mb-2">申请编号</h4>
+                    <p className="text-sm bg-muted p-3 rounded-lg">{selectedApp.application_no}</p>
                   </div>
 
-                  {selectedApp.experience && (
-                    <div>
-                      <h4 className="font-medium mb-2">养宠经验</h4>
-                      <p className="text-sm bg-muted p-3 rounded-lg">{selectedApp.experience}</p>
+                  <div>
+                    <h4 className="font-medium mb-2">申请人信息</h4>
+                    <div className="text-sm bg-muted p-3 rounded-lg space-y-1">
+                      <p>姓名：{selectedApp.applicant_name}</p>
+                      <p>电话：{selectedApp.applicant_phone}</p>
+                      <p>地址：{selectedApp.applicant_address}</p>
                     </div>
-                  )}
+                  </div>
 
-                  {selectedApp.living_condition && (
-                    <div>
-                      <h4 className="font-medium mb-2">居住条件</h4>
-                      <p className="text-sm bg-muted p-3 rounded-lg">{selectedApp.living_condition}</p>
+                  <div>
+                    <h4 className="font-medium mb-2">住房情况</h4>
+                    <div className="text-sm bg-muted p-3 rounded-lg space-y-1">
+                      <p>类型：{selectedApp.housing_type}</p>
+                      <p>面积：{selectedApp.housing_area}㎡</p>
+                      <p>院子：{selectedApp.has_yard ? '有' : '无'}</p>
                     </div>
-                  )}
+                  </div>
+
+                  <div>
+                    <h4 className="font-medium mb-2">家庭情况</h4>
+                    <div className="text-sm bg-muted p-3 rounded-lg space-y-1">
+                      <p>成员数：{selectedApp.family_members}人</p>
+                      <p>有孩子：{selectedApp.has_children ? '是' : '否'}</p>
+                      {selectedApp.children_age && <p>孩子年龄：{selectedApp.children_age}</p>}
+                    </div>
+                  </div>
+
+                  <div>
+                    <h4 className="font-medium mb-2">领养原因</h4>
+                    <p className="text-sm bg-muted p-3 rounded-lg">{selectedApp.adoption_reason}</p>
+                  </div>
+
+                  <div>
+                    <h4 className="font-medium mb-2">照顾计划</h4>
+                    <p className="text-sm bg-muted p-3 rounded-lg">{selectedApp.how_to_care}</p>
+                  </div>
+
+                  <div>
+                    <h4 className="font-medium mb-2">应急计划</h4>
+                    <p className="text-sm bg-muted p-3 rounded-lg">{selectedApp.emergency_plan}</p>
+                  </div>
 
                   <div className="flex items-center gap-2 text-sm">
                     <span className="text-muted-foreground">家人同意：</span>
-                    {selectedApp.family_agreement ? (
+                    {selectedApp.family_agree ? (
                       <span className="text-green-600">是</span>
                     ) : (
                       <span className="text-red-600">否</span>
                     )}
                   </div>
 
-                  {selectedApp.status === 0 && (
+                  {selectedApp.status === 'pending' && (
                     <div className="flex gap-2 pt-4">
                       <Button
                         className="flex-1"

@@ -220,14 +220,32 @@ export interface PetCreateRequest {
 
 export interface AdoptionApplication {
   id: number
-  pet_id: number
+  application_no: string
   user_id: number
-  reason: string
-  experience?: string
-  living_condition?: string
-  family_agreement?: boolean
-  status: number
+  pet_id: number
+  organization_id: number
+  applicant_name: string
+  applicant_phone: string
+  applicant_address: string
+  housing_type: string
+  housing_area: number
+  has_yard: boolean
+  family_members: number
+  has_children: boolean
+  children_age?: string
+  family_agree: boolean
+  has_pet_experience?: boolean
+  pet_experience?: string
+  current_pets?: string
+  adoption_reason: string
+  how_to_care: string
+  emergency_plan: string
+  status: string
+  reviewer_id?: number
+  review_comment?: string
+  rejection_reason?: string
   created_at: string
+  updated_at: string
   pet?: Pet
   user?: User
 }
