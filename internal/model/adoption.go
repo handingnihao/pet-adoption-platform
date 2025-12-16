@@ -1,6 +1,10 @@
 package model
 
-import "time"
+import (
+	"database/sql/driver"
+	"fmt"
+	"time"
+)
 
 // ApplicationStatus 申请状态
 type ApplicationStatus int
@@ -42,33 +46,55 @@ func (s ApplicationStatus) MarshalJSON() ([]byte, error) {
 	return []byte(`"` + s.String() + `"`), nil
 }
 
-// UnmarshalJSON 自定义JSON反序列化，将string转为int
-func (s *ApplicationStatus) UnmarshalJSON(data []byte) error {
-	str := string(data)
-	// 移除引号
-	if len(str) >= 2 && str[0] == '"' && str[len(str)-1] == '"' {
-		str = str[1 : len(str)-1]
+// Scan 实现 sql.Scanner 接口，支持从字符串或整数读取
+func (s *ApplicationStatus) Scan(value interface{}) error {
+	if value == nil {
+		*s = ApplicationStatusPending
+		return nil
 	}
-	
-	switch str {
-	case "pending":
-		*s = ApplicationStatusPending
-	case "reviewing":
-		*s = ApplicationStatusReviewing
-	case "interview":
-		*s = ApplicationStatusInterview
-	case "home_visit":
-		*s = ApplicationStatusHomeVisit
-	case "approved":
-		*s = ApplicationStatusApproved
-	case "rejected":
-		*s = ApplicationStatusRejected
-	case "cancelled":
-		*s = ApplicationStatusCancelled
+
+	switch v := value.(type) {
+	case int64:
+		*s = ApplicationStatus(v)
+	case []uint8:
+		str := string(v)
+		return s.parseString(str)
+	case string:
+		return s.parseString(v)
 	default:
-		*s = ApplicationStatusPending
+		return fmt.Errorf("cannot scan type %T into ApplicationStatus", value)
 	}
 	return nil
+}
+
+// parseString 解析字符串状态
+func (s *ApplicationStatus) parseString(str string) error {
+	switch str {
+	case "pending", "0":
+		*s = ApplicationStatusPending
+	case "reviewing", "1":
+		*s = ApplicationStatusReviewing
+	case "interview", "2":
+		*s = ApplicationStatusInterview
+	case "home_visit", "3":
+		*s = ApplicationStatusHomeVisit
+	case "approved", "4":
+		*s = ApplicationStatusApproved
+	case "rejected", "5":
+		*s = ApplicationStatusRejected
+	case "cancelled", "6":
+		*s = ApplicationStatusCancelled
+	default:
+		// 如果是其他未知字符串，默认为pending或报错
+		// 这里选择报错以便发现问题
+		return fmt.Errorf("unknown status string: %s", str)
+	}
+	return nil
+}
+
+// Value 实现 driver.Valuer 接口，写入数据库时转为整数
+func (s ApplicationStatus) Value() (driver.Value, error) {
+	return int64(s), nil
 }
 
 // HousingType 住房类型
