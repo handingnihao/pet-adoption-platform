@@ -142,7 +142,7 @@ export function UserManagement() {
                         </span>
                       </td>
                       <td className="py-3 px-4 text-sm text-muted-foreground">
-                        {new Date(user.created_at).toLocaleString('zh-CN')}
+                        {user.created_at ? new Date(user.created_at).toLocaleString('zh-CN') : '-'}
                       </td>
                       <td className="py-3 px-4">
                         {user.role !== 'admin' && (

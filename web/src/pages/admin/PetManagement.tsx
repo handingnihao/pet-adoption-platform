@@ -219,6 +219,8 @@ export function PetManagement() {
                                 variant="ghost"
                                 className="text-green-600"
                                 onClick={() => approveMutation.mutate(pet.id)}
+                                disabled={approveMutation.isPending}
+                                title="发布宠物"
                               >
                                 <Check className="h-4 w-4" />
                               </Button>
@@ -227,10 +229,28 @@ export function PetManagement() {
                                 variant="ghost"
                                 className="text-red-600"
                                 onClick={() => rejectMutation.mutate(pet.id)}
+                                disabled={rejectMutation.isPending}
+                                title="拒绝"
                               >
                                 <X className="h-4 w-4" />
                               </Button>
                             </>
+                          )}
+                          {pet.status === 1 && (
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="text-orange-600"
+                              onClick={() => {
+                                if (confirm(`确定要下架宠物 "${pet.name}" 吗？`)) {
+                                  updateMutation.mutate({ id: pet.id, data: { status: 2 } })
+                                }
+                              }}
+                              disabled={updateMutation.isPending}
+                              title="下架"
+                            >
+                              <EyeOff className="h-4 w-4" />
+                            </Button>
                           )}
                           <Button size="sm" variant="ghost" onClick={() => handleEdit(pet)}>
                             <Edit className="h-4 w-4" />
@@ -240,6 +260,7 @@ export function PetManagement() {
                             variant="ghost"
                             className="text-destructive"
                             onClick={() => handleDelete(pet)}
+                            disabled={deleteMutation.isPending}
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>

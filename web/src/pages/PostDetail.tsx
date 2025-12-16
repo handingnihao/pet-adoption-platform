@@ -1,18 +1,38 @@
-import { useParams, Link } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
-import { ArrowLeft, Heart, MessageCircle, Eye, Calendar, User } from 'lucide-react'
+import { useParams, Link, useNavigate } from 'react-router-dom'
+import { useQuery, useMutation } from '@tanstack/react-query'
+import { ArrowLeft, Heart, MessageCircle, Eye, Calendar, User, Trash2 } from 'lucide-react'
 import { Button } from '../components/ui/button'
 import { Card, CardContent } from '../components/ui/card'
 import { communityApi } from '../lib/api'
+import { useAuthStore } from '../store/auth'
 
 export function PostDetail() {
   const { id } = useParams<{ id: string }>()
+  const navigate = useNavigate()
+  const { user } = useAuthStore()
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['post', id],
     queryFn: () => communityApi.getPost(Number(id)),
     enabled: !!id,
   })
+
+  const deleteMutation = useMutation({
+    mutationFn: (postId: number) => communityApi.deletePost(postId),
+    onSuccess: () => {
+      alert('帖子已删除')
+      navigate('/community')
+    },
+    onError: (error: Error) => {
+      alert('删除失败: ' + error.message)
+    },
+  })
+
+  const handleDelete = () => {
+    if (confirm('确定要删除这篇帖子吗？此操作不可恢复。')) {
+      deleteMutation.mutate(Number(id))
+    }
+  }
 
   if (isLoading) {
     return (
@@ -80,25 +100,39 @@ export function PostDetail() {
             </h1>
 
             {/* 作者信息 */}
-            <div className="flex items-center gap-4 text-sm text-muted-foreground mb-6 pb-6 border-b">
-              <div className="flex items-center gap-2">
-                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                  {post.user_avatar ? (
-                    <img src={post.user_avatar} alt="" className="w-10 h-10 rounded-full object-cover" />
-                  ) : (
-                    <User className="h-5 w-5 text-primary" />
-                  )}
+            <div className="flex items-center justify-between text-sm text-muted-foreground mb-6 pb-6 border-b">
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2">
+                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                    {post.user_avatar ? (
+                      <img src={post.user_avatar} alt="" className="w-10 h-10 rounded-full object-cover" />
+                    ) : (
+                      <User className="h-5 w-5 text-primary" />
+                    )}
+                  </div>
+                  <span className="font-medium text-foreground">{post.username || '匿名用户'}</span>
                 </div>
-                <span className="font-medium text-foreground">{post.username || '匿名用户'}</span>
+                <div className="flex items-center gap-1">
+                  <Calendar className="h-4 w-4" />
+                  {new Date(post.created_at).toLocaleDateString('zh-CN', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                  })}
+                </div>
               </div>
-              <div className="flex items-center gap-1">
-                <Calendar className="h-4 w-4" />
-                {new Date(post.created_at).toLocaleDateString('zh-CN', {
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric',
-                })}
-              </div>
+              {user?.id === post.user_id && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-destructive"
+                  onClick={handleDelete}
+                  disabled={deleteMutation.isPending}
+                >
+                  <Trash2 className="h-4 w-4 mr-1" />
+                  删除
+                </Button>
+              )}
             </div>
 
             {/* 图片 */}
