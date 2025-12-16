@@ -39,25 +39,48 @@ export function AdoptApply() {
   })
 
   const mutation = useMutation({
-    mutationFn: () => adoptionApi.createApplication({
-      pet_id: Number(id),
-      organization_id: 1,
-      applicant_name: formData.applicant_name,
-      applicant_phone: formData.applicant_phone,
-      applicant_address: formData.applicant_address,
-      housing_type: formData.housing_type,
-      housing_area: formData.housing_area,
-      has_yard: formData.has_yard,
-      family_members: formData.family_members,
-      has_children: formData.has_children,
-      children_age: formData.children_age,
-      family_agree: formData.family_agree,
-      adoption_reason: formData.adoption_reason,
-      how_to_care: formData.how_to_care,
-      emergency_plan: formData.emergency_plan,
-    }),
+    mutationFn: () => {
+      console.log('提交的数据:', {
+        pet_id: Number(id),
+        organization_id: 1,
+        applicant_name: formData.applicant_name,
+        applicant_phone: formData.applicant_phone,
+        applicant_address: formData.applicant_address,
+        housing_type: formData.housing_type,
+        housing_area: formData.housing_area,
+        has_yard: formData.has_yard,
+        family_members: formData.family_members,
+        has_children: formData.has_children,
+        children_age: formData.children_age,
+        family_agree: formData.family_agree,
+        adoption_reason: formData.adoption_reason,
+        how_to_care: formData.how_to_care,
+        emergency_plan: formData.emergency_plan,
+      })
+      return adoptionApi.createApplication({
+        pet_id: Number(id),
+        organization_id: 1,
+        applicant_name: formData.applicant_name,
+        applicant_phone: formData.applicant_phone,
+        applicant_address: formData.applicant_address,
+        housing_type: formData.housing_type,
+        housing_area: formData.housing_area,
+        has_yard: formData.has_yard,
+        family_members: formData.family_members,
+        has_children: formData.has_children,
+        children_age: formData.children_age,
+        family_agree: formData.family_agree,
+        adoption_reason: formData.adoption_reason,
+        how_to_care: formData.how_to_care,
+        emergency_plan: formData.emergency_plan,
+      })
+    },
     onSuccess: () => {
       navigate('/my-applications', { state: { message: '申请已提交，请等待审核' } })
+    },
+    onError: (error: any) => {
+      console.error('提交失败:', error)
+      console.error('错误详情:', error.response?.data)
     },
   })
 

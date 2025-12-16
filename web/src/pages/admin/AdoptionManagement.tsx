@@ -35,17 +35,24 @@ export function AdoptionManagement() {
       if (statusFilter === 'pending') {
         return adminApi.getPendingApplications({ page, page_size: 10 })
       }
+      // 将字符串状态映射为数字
+      const statusMap: Record<string, number> = {
+        'pending': 0,
+        'approved': 1,
+        'rejected': 2,
+      }
+      const numericStatus = statusFilter !== 'all' ? statusMap[statusFilter] : undefined
       return adminApi.getAllApplications({ 
         page, 
         page_size: 10,
-        status: statusFilter !== 'all' ? statusFilter : undefined
+        status: numericStatus
       })
     },
   })
 
   const reviewMutation = useMutation({
-    mutationFn: ({ id, action }: { id: number; action: string }) =>
-      adminApi.reviewApplication(id, { action, comment: '', reason: '' }),
+    mutationFn: ({ id, status, remark }: { id: number; status: number; remark?: string }) =>
+      adminApi.reviewApplication(id, { status, remark }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'applications'] })
       queryClient.invalidateQueries({ queryKey: ['admin', 'adoption-statistics'] })
@@ -59,14 +66,14 @@ export function AdoptionManagement() {
 
   const handleApprove = (app: AdoptionApplication) => {
     if (confirm('确定要通过这个领养申请吗？')) {
-      reviewMutation.mutate({ id: app.id, action: 'approve' })
+      reviewMutation.mutate({ id: app.id, status: 1 })
     }
   }
 
   const handleReject = (app: AdoptionApplication) => {
     const reason = prompt('请输入拒绝原因：')
     if (reason) {
-      reviewMutation.mutate({ id: app.id, action: 'reject' })
+      reviewMutation.mutate({ id: app.id, status: 2, remark: reason })
     }
   }
 
