@@ -1,4 +1,3 @@
-# 前端构建阶段
 FROM node:18-alpine AS frontend-builder
 
 WORKDIR /app
@@ -7,7 +6,8 @@ WORKDIR /app
 COPY package*.json ./
 
 # 安装依赖
-RUN npm ci --only=production
+#RUN npm ci --only=production
+RUN npm ci
 
 # 复制源码
 COPY . .
