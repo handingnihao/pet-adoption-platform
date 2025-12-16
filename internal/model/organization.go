@@ -1,6 +1,8 @@
 package model
 
 import (
+	"database/sql/driver"
+	"fmt"
 	"time"
 )
 
@@ -15,6 +17,66 @@ const (
 	// OrganizationStatusRejected 已拒绝
 	OrganizationStatusRejected
 )
+
+// String 返回状态的字符串表示
+func (s OrganizationStatus) String() string {
+	switch s {
+	case OrganizationStatusPending:
+		return "pending"
+	case OrganizationStatusApproved:
+		return "approved"
+	case OrganizationStatusRejected:
+		return "rejected"
+	default:
+		return "unknown"
+	}
+}
+
+// MarshalJSON 自定义JSON序列化
+func (s OrganizationStatus) MarshalJSON() ([]byte, error) {
+	return []byte(`"` + s.String() + `"`), nil
+}
+
+// Scan 实现 sql.Scanner 接口，支持从字符串或整数读取
+func (s *OrganizationStatus) Scan(value interface{}) error {
+	if value == nil {
+		*s = OrganizationStatusPending
+		return nil
+	}
+
+	switch v := value.(type) {
+	case int64:
+		*s = OrganizationStatus(v)
+	case []uint8:
+		str := string(v)
+		return s.parseString(str)
+	case string:
+		return s.parseString(v)
+	default:
+		return fmt.Errorf("cannot scan type %T into OrganizationStatus", value)
+	}
+	return nil
+}
+
+// parseString 解析字符串状态
+func (s *OrganizationStatus) parseString(str string) error {
+	switch str {
+	case "pending", "0":
+		*s = OrganizationStatusPending
+	case "approved", "1":
+		*s = OrganizationStatusApproved
+	case "rejected", "2":
+		*s = OrganizationStatusRejected
+	default:
+		return fmt.Errorf("unknown organization status string: %s", str)
+	}
+	return nil
+}
+
+// Value 实现 driver.Valuer 接口，写入数据库时转为整数
+func (s OrganizationStatus) Value() (driver.Value, error) {
+	return int64(s), nil
+}
 
 // Organization 机构模型
 type Organization struct {
