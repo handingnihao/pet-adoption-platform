@@ -17,6 +17,7 @@ export function Header() {
   const navItems = [
     { name: '首页', href: '/' },
     { name: '找宠物', href: '/pets' },
+    { name: '爱心捐赠', href: '/donate' },
     { name: '领养指南', href: '/guide' },
     { name: '社区', href: '/community' },
     { name: '关于我们', href: '/about' },
@@ -80,6 +81,20 @@ export function Header() {
                   >
                     <Heart className="h-4 w-4 mr-2" />
                     我的申请
+                  </Link>
+                  <Link
+                    to="/my-donations"
+                    className="flex items-center px-4 py-2 text-sm hover:bg-muted"
+                  >
+                    <Heart className="h-4 w-4 mr-2" />
+                    我的捐赠
+                  </Link>
+                  <Link
+                    to="/my-organizations"
+                    className="flex items-center px-4 py-2 text-sm hover:bg-muted"
+                  >
+                    <PawPrint className="h-4 w-4 mr-2" />
+                    我的机构
                   </Link>
                   {user?.role === 'admin' && (
                     <>
