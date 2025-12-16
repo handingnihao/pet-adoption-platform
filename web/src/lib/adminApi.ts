@@ -32,7 +32,7 @@ export const adminApi = {
     api.get<unknown, ApiResponse<PageResponse<AdoptionApplication>>>('/adoptions/applications', { params }),
   getPendingApplications: (params?: { page?: number; page_size?: number }) =>
     api.get<unknown, ApiResponse<PageResponse<AdoptionApplication>>>('/adoptions/applications/pending', { params }),
-  reviewApplication: (id: number, data: { status: number; remark?: string }) =>
+  reviewApplication: (id: number, data: { action: 'approve' | 'reject' | 'interview' | 'home_visit'; comment?: string; reason?: string }) =>
     api.put<unknown, ApiResponse>(`/adoptions/applications/${id}/review`, data),
   getAdoptionStatistics: () =>
     api.get<unknown, ApiResponse<AdoptionStatistics>>('/adoptions/statistics'),

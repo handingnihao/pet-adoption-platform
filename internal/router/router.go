@@ -245,14 +245,6 @@ func InitRouter(db *gorm.DB, rdb *redis.Client) *gin.Engine {
 			files.POST("/credential", uploadCtrl.UploadCredential) // 上传机构认证图片
 			files.DELETE("", uploadCtrl.DeleteFile)                // 删除文件
 		}
-
-		// 管理后台路由（未实现）
-		// admin := v1.Group("/admin")
-		// admin.Use(middleware.Auth(), middleware.AdminAuth())
-		// {
-		// 	// admin.GET("/dashboard", controller.GetDashboard) // 仪表盘
-		// 	// admin.GET("/stats", controller.GetStats)         // 统计数据
-		// }
 	}
 
 	return r

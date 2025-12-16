@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Search, Edit, Trash2, Check, X, Eye, Clock, CheckCircle, XCircle, EyeOff } from 'lucide-react'
+import { Search, Edit, Trash2, Check, X, Eye, Clock, CheckCircle, EyeOff } from 'lucide-react'
 import { Button } from '../../components/ui/button'
 import { Input } from '../../components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card'
@@ -8,11 +8,11 @@ import { petApi } from '../../lib/api'
 import { adminApi } from '../../lib/adminApi'
 import type { Pet } from '../../lib/api'
 
-const statusConfig = {
-  0: { label: '待审核', icon: Clock, color: 'text-yellow-500', bg: 'bg-yellow-50' },
-  1: { label: '已发布', icon: CheckCircle, color: 'text-green-500', bg: 'bg-green-50' },
-  2: { label: '已下架', icon: EyeOff, color: 'text-gray-500', bg: 'bg-gray-50' },
-  3: { label: '已拒绝', icon: XCircle, color: 'text-red-500', bg: 'bg-red-50' },
+const statusConfig: Record<string, { label: string; icon: typeof Clock; color: string; bg: string }> = {
+  pending: { label: '待审核', icon: Clock, color: 'text-yellow-500', bg: 'bg-yellow-50' },
+  available: { label: '已发布', icon: CheckCircle, color: 'text-green-500', bg: 'bg-green-50' },
+  adopted: { label: '已领养', icon: CheckCircle, color: 'text-blue-500', bg: 'bg-blue-50' },
+  offline: { label: '已下架', icon: EyeOff, color: 'text-gray-500', bg: 'bg-gray-50' },
 }
 
 const petTypes = [
@@ -72,6 +72,10 @@ export function PetManagement() {
     mutationFn: (id: number) => adminApi.approvePet(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'all-pets'] })
+      alert('审核通过成功')
+    },
+    onError: (error: Error) => {
+      alert('审核失败: ' + error.message)
     },
   })
 
@@ -178,7 +182,7 @@ export function PetManagement() {
               ) : (
                 <div className="space-y-3">
                   {pets.map((pet: Pet) => {
-                    const status = statusConfig[pet.status as keyof typeof statusConfig] || statusConfig[0]
+                    const status = statusConfig[pet.status] || statusConfig['pending']
                     const StatusIcon = status.icon
                     return (
                       <div
@@ -212,7 +216,7 @@ export function PetManagement() {
                           </p>
                         </div>
                         <div className="flex items-center gap-1">
-                          {pet.status === 0 && (
+                          {pet.status === 'pending' && (
                             <>
                               <Button
                                 size="sm"
@@ -236,14 +240,14 @@ export function PetManagement() {
                               </Button>
                             </>
                           )}
-                          {pet.status === 1 && (
+                          {pet.status === 'available' && (
                             <Button
                               size="sm"
                               variant="ghost"
                               className="text-orange-600"
                               onClick={() => {
                                 if (confirm(`确定要下架宠物 "${pet.name}" 吗？`)) {
-                                  updateMutation.mutate({ id: pet.id, data: { status: 2 } })
+                                  updateMutation.mutate({ id: pet.id, data: { status: 'offline' } })
                                 }
                               }}
                               disabled={updateMutation.isPending}

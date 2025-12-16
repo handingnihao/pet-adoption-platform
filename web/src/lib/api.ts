@@ -190,7 +190,7 @@ export interface Pet {
   city?: string
   district?: string
   address?: string
-  status: number
+  status: string  // pending | available | adopted | offline
   view_count: number
   created_at: string
   user?: User

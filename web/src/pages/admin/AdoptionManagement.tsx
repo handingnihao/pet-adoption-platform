@@ -56,12 +56,16 @@ export function AdoptionManagement() {
   })
 
   const reviewMutation = useMutation({
-    mutationFn: ({ id, status, remark }: { id: number; status: number; remark?: string }) =>
-      adminApi.reviewApplication(id, { status, remark }),
+    mutationFn: ({ id, action, comment, reason }: { id: number; action: 'approve' | 'reject' | 'interview' | 'home_visit'; comment?: string; reason?: string }) =>
+      adminApi.reviewApplication(id, { action, comment, reason }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'applications'] })
       queryClient.invalidateQueries({ queryKey: ['admin', 'adoption-statistics'] })
       setSelectedApp(null)
+      alert('审核操作成功')
+    },
+    onError: (error: Error) => {
+      alert('审核失败: ' + error.message)
     },
   })
 
@@ -71,14 +75,14 @@ export function AdoptionManagement() {
 
   const handleApprove = (app: AdoptionApplication) => {
     if (confirm('确定要通过这个领养申请吗？')) {
-      reviewMutation.mutate({ id: app.id, status: 1 })
+      reviewMutation.mutate({ id: app.id, action: 'approve' })
     }
   }
 
   const handleReject = (app: AdoptionApplication) => {
     const reason = prompt('请输入拒绝原因：')
     if (reason) {
-      reviewMutation.mutate({ id: app.id, status: 2, remark: reason })
+      reviewMutation.mutate({ id: app.id, action: 'reject', reason })
     }
   }
 

@@ -58,3 +58,16 @@ uploads/
 
 # Documentation build
 docs/_build/
+
+# Docker 核心配置文件
+Dockerfile
+docker-compose.yml
+docker-compose.yaml
+
+# 环境变量文件 (通常包含敏感信息，必须忽略)
+.env
+.env.local
+.env.*
+
+# Docker 忽略文件本身 (可选)
+.dockerignore
