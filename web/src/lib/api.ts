@@ -246,8 +246,24 @@ export interface AdoptionApplication {
   rejection_reason?: string
   created_at: string
   updated_at: string
-  pet?: Pet
-  user?: User
+  pet_info?: {
+    id: number
+    name: string
+    type: string
+    breed: string
+    age: number
+    gender: string
+    cover_photo: string
+    status: string
+  }
+  user_info?: {
+    id: number
+    username: string
+    nickname: string
+    avatar: string
+  }
+  pet?: Pet  // 兼容旧字段
+  user?: User  // 兼容旧字段
 }
 
 export interface AdoptionApplicationRequest {

@@ -135,22 +135,22 @@ export function AdoptionManagement() {
                         onClick={() => setSelectedApp(app)}
                       >
                         <div className="w-16 h-16 rounded-lg overflow-hidden bg-muted flex-shrink-0">
-                          {app.pet?.cover_photo ? (
-                            <img src={app.pet.cover_photo} alt={app.pet.name} className="w-full h-full object-cover" />
+                          {app.pet_info?.cover_photo ? (
+                            <img src={app.pet_info.cover_photo} alt={app.pet_info.name} className="w-full h-full object-cover" />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center text-xl">🐾</div>
                           )}
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2">
-                            <h3 className="font-medium">{app.pet?.name || '未知宠物'}</h3>
+                            <h3 className="font-medium">{app.pet_info?.name || '未知宠物'}</h3>
                             <span className={`flex items-center gap-1 px-2 py-0.5 rounded text-xs ${status?.bg} ${status?.color}`}>
                               <StatusIcon className="h-3 w-3" />
                               {status?.label}
                             </span>
                           </div>
                           <p className="text-sm text-muted-foreground">
-                            申请人: {app.user?.nickname || app.user?.username || '未知'}
+                            申请人: {app.user_info?.nickname || app.user_info?.username || app.applicant_name || '未知'}
                           </p>
                           <p className="text-xs text-muted-foreground mt-1">
                             {new Date(app.created_at).toLocaleString()}

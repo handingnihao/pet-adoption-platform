@@ -96,12 +96,12 @@ export function MyApplications() {
                     {/* 宠物图片 */}
                     <div
                       className="w-24 h-24 rounded-lg overflow-hidden bg-muted cursor-pointer flex-shrink-0"
-                      onClick={() => app.pet && navigate(`/pets/${app.pet.id}`)}
+                      onClick={() => app.pet_info && navigate(`/pets/${app.pet_info.id}`)}
                     >
-                      {app.pet?.cover_photo ? (
+                      {app.pet_info?.cover_photo ? (
                         <img
-                          src={app.pet.cover_photo}
-                          alt={app.pet.name}
+                          src={app.pet_info.cover_photo}
+                          alt={app.pet_info.name}
                           className="w-full h-full object-cover"
                         />
                       ) : (
@@ -116,10 +116,10 @@ export function MyApplications() {
                       <div className="flex items-start justify-between">
                         <div>
                           <h3 className="font-medium">
-                            {app.pet?.name || '未知宠物'}
+                            {app.pet_info?.name || '未知宠物'}
                           </h3>
                           <p className="text-sm text-muted-foreground">
-                            {app.pet?.breed || app.pet?.type} · {app.pet?.age}个月
+                            {app.pet_info?.breed || app.pet_info?.type} · {app.pet_info?.age}个月
                           </p>
                         </div>
                         <div className={`flex items-center gap-1 px-2 py-1 rounded text-sm ${status.bg} ${status.color}`}>
