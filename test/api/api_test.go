@@ -26,8 +26,16 @@ func setupTestRouter() *gin.Engine {
 	gin.SetMode(gin.TestMode)
 	
 	// 初始化数据库和缓存（使用测试配置）
-	db := database.InitDB()
-	rdb := cache.InitRedis()
+	if err := database.InitMySQL(); err != nil {
+		panic("初始化数据库失败: " + err.Error())
+	}
+	
+	if err := cache.InitRedis(); err != nil {
+		panic("初始化Redis失败: " + err.Error())
+	}
+	
+	db := database.GetDB()
+	rdb := cache.GetRedis()
 	
 	return router.InitRouter(db, rdb)
 }
