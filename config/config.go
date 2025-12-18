@@ -125,6 +125,8 @@ func Init() error {
 	viper.SetConfigType("yaml")
 	viper.AddConfigPath("./config")
 	viper.AddConfigPath(".")
+	viper.AddConfigPath("../config")      // 支持从test目录加载
+	viper.AddConfigPath("../../config")   // 支持从test/api目录加载
 
 	// 读取配置文件
 	if err := viper.ReadInConfig(); err != nil {

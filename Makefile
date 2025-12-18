@@ -17,12 +17,16 @@ build: ## 编译项目
 build-linux: ## 编译Linux版本
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o bin/server-linux cmd/server/main.go
 
-test: ## 运行测试
+test: ## 运行所有测试
 	go test -v ./...
+
+test-api: ## 运行API测试
+	go test -v ./test/api/...
 
 test-coverage: ## 运行测试并生成覆盖率报告
 	go test -v -coverprofile=coverage.out ./...
-	go tool cover -html=coverage.out
+	go tool cover -html=coverage.out -o coverage.html
+	@echo "覆盖率报告已生成: coverage.html"
 
 clean: ## 清理编译文件
 	rm -rf bin/

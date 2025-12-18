@@ -5,13 +5,16 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"pet-adoption-platform/config"
 	"pet-adoption-platform/internal/router"
-	"pet-adoption-platform/pkg/database"
 	"pet-adoption-platform/pkg/cache"
+	"pet-adoption-platform/pkg/database"
+	"pet-adoption-platform/pkg/logger"
 	"pet-adoption-platform/pkg/response"
 	"testing"
 
 	"github.com/gin-gonic/gin"
+	"github.com/redis/go-redis/v9"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -25,17 +28,32 @@ var (
 func setupTestRouter() *gin.Engine {
 	gin.SetMode(gin.TestMode)
 	
-	// 初始化数据库和缓存（使用测试配置）
+	// 初始化配置（从项目根目录加载）
+	if err := config.Init(); err != nil {
+		panic("初始化配置失败: " + err.Error())
+	}
+	
+	// 初始化日志
+	if err := logger.Init(); err != nil {
+		panic("初始化日志失败: " + err.Error())
+	}
+	
+	// 初始化数据库
 	if err := database.InitMySQL(); err != nil {
 		panic("初始化数据库失败: " + err.Error())
 	}
 	
+	// 初始化Redis（如果失败则使用nil，某些功能可能不可用）
+	var rdb *redis.Client
 	if err := cache.InitRedis(); err != nil {
-		panic("初始化Redis失败: " + err.Error())
+		// Redis连接失败时打印警告但不中断测试
+		println("警告: Redis连接失败，某些功能可能不可用:", err.Error())
+		rdb = nil
+	} else {
+		rdb = cache.GetRedis()
 	}
 	
 	db := database.GetDB()
-	rdb := cache.GetRedis()
 	
 	return router.InitRouter(db, rdb)
 }
