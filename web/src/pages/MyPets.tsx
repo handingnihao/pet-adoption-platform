@@ -92,7 +92,8 @@ export function MyPets() {
         <>
           <div className="grid md:grid-cols-2 gap-4">
             {pets.map((pet: Pet) => {
-              const status = statusConfig[pet.status as keyof typeof statusConfig] || statusConfig[0]
+              const statusKey = (typeof pet.status === 'string' ? parseInt(pet.status, 10) : pet.status) as 0 | 1 | 2 | 3
+              const status = statusConfig[statusKey] || statusConfig[0]
               const StatusIcon = status.icon
               return (
                 <Card key={pet.id}>
