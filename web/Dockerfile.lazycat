@@ -8,7 +8,9 @@ WORKDIR /app
 
 # 复制依赖文件
 COPY package*.json ./
-RUN npm ci
+
+# 安装依赖 (使用 npm install 替代 npm ci 以处理依赖冲突)
+RUN npm install --legacy-peer-deps
 
 # 复制源码
 COPY . .
