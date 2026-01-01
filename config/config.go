@@ -128,6 +128,30 @@ func Init() error {
 	viper.AddConfigPath("../config")      // 支持从test目录加载
 	viper.AddConfigPath("../../config")   // 支持从test/api目录加载
 
+	// 启用环境变量支持
+	viper.AutomaticEnv()
+
+	// 绑定环境变量到配置项
+	// 数据库配置
+	viper.BindEnv("database.mysql.host", "DB_HOST")
+	viper.BindEnv("database.mysql.port", "DB_PORT")
+	viper.BindEnv("database.mysql.username", "DB_USER")
+	viper.BindEnv("database.mysql.password", "DB_PASSWORD")
+	viper.BindEnv("database.mysql.database", "DB_NAME")
+	
+	// Redis 配置
+	viper.BindEnv("redis.host", "REDIS_HOST")
+	viper.BindEnv("redis.port", "REDIS_PORT")
+	viper.BindEnv("redis.password", "REDIS_PASSWORD")
+	
+	// 服务器配置
+	viper.BindEnv("server.mode", "SERVER_MODE")
+	viper.BindEnv("server.host", "SERVER_HOST")
+	viper.BindEnv("server.port", "SERVER_PORT")
+	
+	// JWT 配置
+	viper.BindEnv("jwt.secret", "JWT_SECRET")
+
 	// 读取配置文件
 	if err := viper.ReadInConfig(); err != nil {
 		return fmt.Errorf("读取配置文件失败: %w", err)

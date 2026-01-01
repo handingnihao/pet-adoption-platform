@@ -1,0 +1,123 @@
+package: cloud.lazycat.app.petadoption
+version: 1.0.0
+name: 爱心宠物领养平台
+description: >-
+  连接宠物救助机构与领养者的综合性在线平台。支持宠物发布、领养申请、
+  机构入驻、社区互动、爱心捐赠等功能。让每一只流浪动物都能找到温暖的家。
+author: handingnihao
+homepage: https://github.com/handingnihao/pet-adoption-platform
+
+locales:
+  zh:
+    name: 爱心宠物领养平台
+    description: 连接宠物救助机构与领养者的综合性在线平台，支持宠物发布、领养申请、社区互动等功能。
+  en:
+    name: Pet Adoption Platform
+    description: A comprehensive online platform connecting pet rescue organizations with adopters.
+
+application:
+  subdomain: petadoption
+  multi_instance: false
+  background_task: false
+  routes:
+    - /=http://frontend:80/
+  public_path:
+    - /
+  ingress:
+    - protocol: tcp
+      port: 80
+      service: frontend
+
+unsupported_platforms:
+  - ios
+  - android
+
+services:
+  # MySQL 数据库
+  mysql:
+    image: registry.lazycat.cloud/handingnihao/library/mysql:5cb1ef07cebdd9d9
+    user: root
+    environment:
+      - MYSQL_ROOT_PASSWORD=PetAdopt2025!
+      - MYSQL_DATABASE=pet_adoption
+      - MYSQL_USER=pet_user
+      - MYSQL_PASSWORD=PetAdopt2025!
+    binds:
+      - /lzcapp/var/mysql:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 30s
+      timeout: 20s
+      retries: 10
+      start_period: 120s
+
+  # Redis 缓存
+  redis:
+    image: registry.lazycat.cloud/handingnihao/library/redis:d076d5307a0fc918
+    binds:
+      - /lzcapp/var/redis:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 10s
+
+  # Go 后端
+  backend:
+    image: registry.lazycat.cloud/handingnihao/idocker1688/pet-adoption-backend:d9e3f64f3f700b85
+    user: root
+    depends_on:
+      - mysql
+      - redis
+    environment:
+      # 数据库配置
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_USER=pet_user
+      - DB_PASSWORD=PetAdopt2025!
+      - DB_NAME=pet_adoption
+      # Redis 配置
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      # 应用配置
+      - SERVER_MODE=release
+      - JWT_SECRET=${LAZYCAT_BOX_NAME}
+      - BASE_URL=https://${LAZYCAT_APP_DOMAIN}
+    binds:
+      - /lzcapp/var/logs:/app/logs
+      - /lzcapp/var/uploads:/app/uploads
+    setup_script: |
+      echo "等待 MySQL 启动..."
+      for i in $(seq 1 60); do
+        nc -z mysql 3306 >/dev/null 2>&1 && break
+        echo "等待 MySQL... ($i/60)"
+        sleep 2
+      done
+      
+      echo "等待 Redis 启动..."
+      for i in $(seq 1 30); do
+        nc -z redis 6379 >/dev/null 2>&1 && break
+        echo "等待 Redis... ($i/30)"
+        sleep 2
+      done
+      
+      echo "依赖服务已就绪，启动应用..."
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # React 前端 + Nginx
+  frontend:
+    image: registry.lazycat.cloud/handingnihao/idocker1688/pet-adoption-frontend:c56896f3a28ac1c8
+    depends_on:
+      - backend
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:80/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
