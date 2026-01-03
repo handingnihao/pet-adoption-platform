@@ -35,12 +35,15 @@ FROM alpine:3.19
 
 WORKDIR /app
 
-# 安装基础工具
-RUN apk add --no-cache ca-certificates tzdata wget
+# 安装基础工具 (添加 mysql-client 用于数据库迁移)
+RUN apk add --no-cache ca-certificates tzdata wget mysql-client
 
 # 复制编译产物
 COPY --from=builder /app/server .
 COPY --from=builder /app/config/config.yaml.example ./config/config.yaml
+
+# 复制数据库迁移脚本
+COPY --from=builder /app/scripts/migration /app/migrations
 
 # 创建必要目录
 RUN mkdir -p /app/logs /app/uploads
