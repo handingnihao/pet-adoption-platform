@@ -44,7 +44,8 @@ export function PetManagement() {
       if (searchKeyword) {
         return petApi.search({ keyword: searchKeyword, page, page_size: 10 })
       }
-      return petApi.list({ page, page_size: 10 })
+      // 管理员默认查看待审核的宠物列表
+      return adminApi.getPendingPets({ page, page_size: 10 })
     },
   })
 
@@ -187,9 +188,8 @@ export function PetManagement() {
                     return (
                       <div
                         key={pet.id}
-                        className={`flex gap-4 p-4 border rounded-lg transition-colors ${
-                          editingPet?.id === pet.id ? 'border-primary bg-primary/5' : 'hover:bg-muted/50'
-                        }`}
+                        className={`flex gap-4 p-4 border rounded-lg transition-colors ${editingPet?.id === pet.id ? 'border-primary bg-primary/5' : 'hover:bg-muted/50'
+                          }`}
                       >
                         <div className="w-16 h-16 rounded-lg overflow-hidden bg-muted flex-shrink-0">
                           {pet.cover_photo ? (
