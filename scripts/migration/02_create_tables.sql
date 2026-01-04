@@ -29,7 +29,7 @@ CREATE TABLE users (
     birthday DATE COMMENT '生日',
     id_card VARCHAR(18) COMMENT '身份证号',
     address TEXT COMMENT '地址',
-    role ENUM('user', 'organization', 'volunteer', 'admin') DEFAULT 'user' COMMENT '角色',
+    role VARCHAR(50) DEFAULT 'user' COMMENT '角色',
     status TINYINT DEFAULT 1 COMMENT '状态: 0-禁用, 1-正常',
     last_login_at TIMESTAMP NULL COMMENT '最后登录时间',
     last_login_ip VARCHAR(50) COMMENT '最后登录IP',
@@ -62,7 +62,7 @@ CREATE TABLE organizations (
     logo VARCHAR(255) COMMENT 'Logo URL',
     images TEXT COMMENT '机构图片(JSON数组)',
     license_image VARCHAR(255) COMMENT '营业执照图片URL',
-    status ENUM('pending', 'approved', 'rejected') DEFAULT 'pending' COMMENT '审核状态',
+    status VARCHAR(50) DEFAULT 'pending' COMMENT '审核状态',
     verified TINYINT DEFAULT 0 COMMENT '是否认证: 0-未认证, 1-已认证',
     user_id BIGINT NOT NULL COMMENT '关联用户ID',
     rating DECIMAL(3,2) DEFAULT 5.00 COMMENT '评分(1.00-5.00)',
@@ -85,9 +85,9 @@ DROP TABLE IF EXISTS pets;
 CREATE TABLE pets (
     id BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT '宠物ID',
     name VARCHAR(50) NOT NULL COMMENT '宠物名称',
-    species ENUM('dog', 'cat', 'other') NOT NULL COMMENT '物种: dog-狗, cat-猫, other-其他',
+    species VARCHAR(50) NOT NULL COMMENT '物种: dog-狗, cat-猫, other-其他',
     breed VARCHAR(50) COMMENT '品种',
-    gender ENUM('male', 'female', 'unknown') COMMENT '性别',
+    gender VARCHAR(20) COMMENT '性别',
     age_months INT COMMENT '年龄(月)',
     weight DECIMAL(5,2) COMMENT '体重(kg)',
     color VARCHAR(50) COMMENT '颜色',
@@ -101,7 +101,7 @@ CREATE TABLE pets (
     video_url VARCHAR(255) COMMENT '视频URL',
     organization_id BIGINT NOT NULL COMMENT '所属机构ID',
     location VARCHAR(100) COMMENT '所在地',
-    status ENUM('available', 'reserved', 'adopted', 'fostered') DEFAULT 'available' COMMENT '状态',
+    status VARCHAR(50) DEFAULT 'available' COMMENT '状态',
     view_count INT DEFAULT 0 COMMENT '浏览次数',
     like_count INT DEFAULT 0 COMMENT '点赞数',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
@@ -123,10 +123,10 @@ CREATE TABLE pets (
 DROP TABLE IF EXISTS adoption_applications;
 CREATE TABLE adoption_applications (
     id BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT '申请ID',
-    application_no VARCHAR(50) UNIQUE NOT NULL COMMENT '申请编号',
+    application_no VARCHAR(50) NULL COMMENT '申请编号',
     user_id BIGINT NOT NULL COMMENT '申请人ID',
     pet_id BIGINT NOT NULL COMMENT '宠物ID',
-    organization_id BIGINT NOT NULL COMMENT '机构ID',
+    organization_id BIGINT NULL COMMENT '机构ID',
     
     -- 申请人信息
     applicant_name VARCHAR(50) NOT NULL COMMENT '申请人姓名',
@@ -135,7 +135,7 @@ CREATE TABLE adoption_applications (
     applicant_address TEXT COMMENT '地址',
     
     -- 家庭情况
-    housing_type ENUM('apartment', 'house', 'villa', 'other') COMMENT '住房类型',
+    housing_type VARCHAR(50) DEFAULT 'other' COMMENT '住房类型',
     housing_area INT COMMENT '住房面积(平方米)',
     has_yard TINYINT DEFAULT 0 COMMENT '是否有院子',
     family_members INT COMMENT '家庭成员数',
@@ -159,8 +159,7 @@ CREATE TABLE adoption_applications (
     additional_files TEXT COMMENT '其他附件(JSON)',
     
     -- 审核流程
-    status ENUM('pending', 'reviewing', 'interview', 'home_visit', 'approved', 'rejected', 'cancelled') 
-        DEFAULT 'pending' COMMENT '状态',
+    status VARCHAR(50) DEFAULT 'pending' COMMENT '状态',
     reviewer_id BIGINT COMMENT '审核人ID',
     review_comment TEXT COMMENT '审核意见',
     interview_time TIMESTAMP NULL COMMENT '面试时间',
@@ -181,8 +180,7 @@ CREATE TABLE adoption_applications (
     INDEX idx_created_at (created_at),
     UNIQUE KEY uk_user_pet (user_id, pet_id, created_at),
     CONSTRAINT fk_app_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE RESTRICT,
-    CONSTRAINT fk_app_pet FOREIGN KEY (pet_id) REFERENCES pets(id) ON DELETE RESTRICT,
-    CONSTRAINT fk_app_org FOREIGN KEY (organization_id) REFERENCES organizations(id) ON DELETE RESTRICT
+    CONSTRAINT fk_app_pet FOREIGN KEY (pet_id) REFERENCES pets(id) ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='领养申请表';
 
 -- ============================================
@@ -194,13 +192,13 @@ CREATE TABLE adoptions (
     application_id BIGINT UNIQUE NOT NULL COMMENT '申请ID',
     user_id BIGINT NOT NULL COMMENT '领养人ID',
     pet_id BIGINT NOT NULL COMMENT '宠物ID',
-    organization_id BIGINT NOT NULL COMMENT '机构ID',
+    organization_id BIGINT NULL COMMENT '机构ID',
     adoption_date DATE NOT NULL COMMENT '领养日期',
     handover_location VARCHAR(255) COMMENT '交接地点',
     agreement_url VARCHAR(255) COMMENT '协议文件URL',
     agreement_signed TINYINT DEFAULT 0 COMMENT '协议是否签署',
     follow_up_plan TEXT COMMENT '回访计划(JSON)',
-    status ENUM('active', 'returned', 'deceased') DEFAULT 'active' COMMENT '状态',
+    status VARCHAR(50) DEFAULT 'active' COMMENT '状态',
     notes TEXT COMMENT '备注',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
@@ -213,8 +211,7 @@ CREATE TABLE adoptions (
     INDEX idx_status (status),
     CONSTRAINT fk_adoption_app FOREIGN KEY (application_id) REFERENCES adoption_applications(id) ON DELETE RESTRICT,
     CONSTRAINT fk_adoption_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE RESTRICT,
-    CONSTRAINT fk_adoption_pet FOREIGN KEY (pet_id) REFERENCES pets(id) ON DELETE RESTRICT,
-    CONSTRAINT fk_adoption_org FOREIGN KEY (organization_id) REFERENCES organizations(id) ON DELETE RESTRICT
+    CONSTRAINT fk_adoption_pet FOREIGN KEY (pet_id) REFERENCES pets(id) ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='领养记录表';
 
 -- ============================================
@@ -225,7 +222,7 @@ CREATE TABLE follow_up_records (
     id BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT '回访记录ID',
     adoption_id BIGINT NOT NULL COMMENT '领养记录ID',
     follow_up_date DATE NOT NULL COMMENT '回访日期',
-    follow_up_type ENUM('7days', '30days', '90days', '180days', 'custom') COMMENT '回访类型',
+    follow_up_type VARCHAR(50) COMMENT '回访类型',
     visitor_id BIGINT COMMENT '回访人ID',
     pet_status TEXT COMMENT '宠物状况',
     living_environment TEXT COMMENT '生活环境',
@@ -259,7 +256,7 @@ CREATE TABLE posts (
     video_url VARCHAR(255) COMMENT '视频URL',
     topic_ids TEXT COMMENT '话题ID(JSON)',
     pet_id BIGINT COMMENT '关联宠物ID',
-    type ENUM('story', 'knowledge', 'daily', 'other') DEFAULT 'daily' COMMENT '类型',
+    type VARCHAR(50) DEFAULT 'daily' COMMENT '类型',
     view_count INT DEFAULT 0 COMMENT '浏览次数',
     like_count INT DEFAULT 0 COMMENT '点赞数',
     comment_count INT DEFAULT 0 COMMENT '评论数',
@@ -310,18 +307,22 @@ CREATE TABLE comments (
 DROP TABLE IF EXISTS donations;
 CREATE TABLE donations (
     id BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT '捐赠ID',
-    donation_no VARCHAR(50) UNIQUE NOT NULL COMMENT '捐赠单号',
-    user_id BIGINT COMMENT '捐赠人ID',
+    donation_no VARCHAR(50) NULL COMMENT '捐赠单号',
+    user_id BIGINT NOT NULL COMMENT '捐赠人ID',
     organization_id BIGINT COMMENT '受捐机构ID',
     pet_id BIGINT COMMENT '定向宠物ID',
-    type ENUM('money', 'goods') NOT NULL COMMENT '捐赠类型',
+    type VARCHAR(50) NOT NULL COMMENT '捐赠类型',
     amount DECIMAL(10,2) COMMENT '金额',
+    supply_items TEXT COMMENT '物资清单(JSON)',
+    service_desc TEXT COMMENT '服务描述',
     goods_description TEXT COMMENT '物资描述',
-    payment_method ENUM('wechat', 'alipay', 'bank') COMMENT '支付方式',
+    payment_method VARCHAR(50) COMMENT '支付方式',
     transaction_id VARCHAR(100) COMMENT '交易流水号',
     is_anonymous TINYINT DEFAULT 0 COMMENT '是否匿名',
     message TEXT COMMENT '留言',
-    status ENUM('pending', 'paid', 'failed', 'refunded') DEFAULT 'pending' COMMENT '状态',
+    status TINYINT DEFAULT 0 COMMENT '状态',
+    confirmed_at TIMESTAMP NULL COMMENT '确认时间',
+    confirmed_by BIGINT COMMENT '确认人ID',
     receipt_url VARCHAR(255) COMMENT '电子收据URL',
     paid_at TIMESTAMP NULL COMMENT '支付时间',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
@@ -344,7 +345,7 @@ DROP TABLE IF EXISTS notifications;
 CREATE TABLE notifications (
     id BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT '通知ID',
     user_id BIGINT NOT NULL COMMENT '接收用户ID',
-    type ENUM('system', 'adoption', 'follow_up', 'comment', 'like', 'donation') NOT NULL COMMENT '类型',
+    type VARCHAR(50) NOT NULL COMMENT '类型',
     title VARCHAR(200) NOT NULL COMMENT '标题',
     content TEXT COMMENT '内容',
     related_id BIGINT COMMENT '关联ID',
