@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
-import { Search, Filter, MapPin, Heart } from 'lucide-react'
+import { Search, Filter, MapPin } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 import { Button } from '../components/ui/button'
 import { Input } from '../components/ui/input'
@@ -21,7 +21,7 @@ const petTypes = [
 export function PetList() {
   const [searchParams, setSearchParams] = useSearchParams()
   const [keyword, setKeyword] = useState(searchParams.get('keyword') || '')
-  
+
   const currentType = searchParams.get('type') || ''
   const currentPage = parseInt(searchParams.get('page') || '1')
 
@@ -172,15 +172,6 @@ function PetCard({ pet }: { pet: Pet }) {
               {pet.type === 'cat' ? '🐱' : pet.type === 'dog' ? '🐕' : '🐾'}
             </div>
           )}
-          <button
-            className="absolute top-3 right-3 p-2 bg-white/80 rounded-full hover:bg-white transition-colors"
-            onClick={(e) => {
-              e.preventDefault()
-              // TODO: 收藏功能
-            }}
-          >
-            <Heart className="h-4 w-4" />
-          </button>
         </div>
         <CardContent className="p-4">
           <div className="flex items-center justify-between mb-2">

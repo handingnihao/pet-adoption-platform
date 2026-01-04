@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
-import { ArrowLeft, MapPin, Heart, Share2, MessageCircle, CheckCircle, XCircle } from 'lucide-react'
+import { ArrowLeft, MapPin, MessageCircle, CheckCircle, XCircle } from 'lucide-react'
 import { Button } from '../components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
 import { petApi } from '../lib/api'
@@ -91,9 +91,8 @@ export function PetDetail() {
                 <button
                   key={idx}
                   onClick={() => setSelectedImage(idx)}
-                  className={`w-20 h-20 rounded-md overflow-hidden flex-shrink-0 border-2 ${
-                    selectedImage === idx ? 'border-primary' : 'border-transparent'
-                  }`}
+                  className={`w-20 h-20 rounded-md overflow-hidden flex-shrink-0 border-2 ${selectedImage === idx ? 'border-primary' : 'border-transparent'
+                    }`}
                 >
                   <img src={img} alt="" className="w-full h-full object-cover" />
                 </button>
@@ -111,14 +110,6 @@ export function PetDetail() {
                 <p className="text-muted-foreground">
                   {pet.breed || pet.type} · {genderText} · {pet.age}个月
                 </p>
-              </div>
-              <div className="flex gap-2">
-                <Button variant="outline" size="icon">
-                  <Heart className="h-4 w-4" />
-                </Button>
-                <Button variant="outline" size="icon">
-                  <Share2 className="h-4 w-4" />
-                </Button>
               </div>
             </div>
           </div>
