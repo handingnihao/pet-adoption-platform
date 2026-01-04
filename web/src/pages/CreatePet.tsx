@@ -90,8 +90,8 @@ export function CreatePet() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    if (!formData.name || !formData.type || !formData.age) {
-      alert('请填写必填项')
+    if (!formData.name || !formData.type || !formData.age || !formData.description) {
+      alert('请填写必填项（名称、类型、年龄、详细介绍）')
       return
     }
     mutation.mutate()
@@ -191,7 +191,7 @@ export function CreatePet() {
                   <Input name="character" value={formData.character} onChange={handleChange} placeholder="如：温顺、活泼、粘人等" />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">详细介绍</label>
+                  <label className="text-sm font-medium">详细介绍 *</label>
                   <textarea
                     name="description"
                     value={formData.description}

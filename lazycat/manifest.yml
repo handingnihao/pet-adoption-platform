@@ -37,6 +37,7 @@ services:
   mysql:
     image: registry.lazycat.cloud/handingnihao/library/mysql:5cb1ef07cebdd9d9
     user: root
+    command: --default-authentication-plugin=mysql_native_password
     environment:
       - MYSQL_ROOT_PASSWORD=PetAdopt2025!
       - MYSQL_DATABASE=pet_adoption
@@ -48,8 +49,8 @@ services:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       interval: 30s
       timeout: 20s
-      retries: 10
-      start_period: 120s
+      retries: 15
+      start_period: 480s
 
   # Redis 缓存
   redis:
@@ -65,7 +66,7 @@ services:
 
   # Go 后端
   backend:
-    image: registry.lazycat.cloud/handingnihao/idocker1688/pet-adoption-backend:abe2f805ca13cc89
+    image: registry.lazycat.cloud/handingnihao/idocker1688/pet-adoption-backend:5062efe1763ff702
     user: root
     depends_on:
       - mysql
@@ -88,32 +89,32 @@ services:
       - /lzcapp/var/logs:/app/logs
       - /lzcapp/var/uploads:/app/uploads
     setup_script: |
-      echo "等待 MySQL 启动 (首次初始化可能需要5分钟)..."
-      for i in $(seq 1 150); do
+      echo "等待 MySQL 启动..."
+      for i in $(seq 1 90); do
         nc -z mysql 3306 >/dev/null 2>&1 && break
-        echo "等待 MySQL... ($i/150)"
+        echo "等待 MySQL... ($i/90)"
         sleep 2
       done
       
-      # MySQL 首次初始化后需要额外等待，因为临时服务器会关闭并重新启动
-      echo "MySQL 端口已开放，等待服务稳定 (60秒)..."
-      sleep 60
+      # MySQL 首次初始化后等待服务稳定
+      echo "MySQL 端口已开放，等待服务稳定 (30秒)..."
+      sleep 30
       
       echo "等待 Redis 启动..."
-      for i in $(seq 1 30); do
+      for i in $(seq 1 15); do
         nc -z redis 6379 >/dev/null 2>&1 && break
-        echo "等待 Redis... ($i/30)"
+        echo "等待 Redis... ($i/15)"
         sleep 2
       done
       
-      # 检查并执行数据库迁移
+      # 检查并执行数据库迁移 (使用root用户绕过caching_sha2_password兼容问题)
       echo "检查数据库表是否存在..."
-      TABLE_CHECK=$(mysql -h mysql -u pet_user -pPetAdopt2025! pet_adoption -e "SHOW TABLES LIKE 'users';" 2>/dev/null)
+      TABLE_CHECK=$(mysql -h mysql -u root -pPetAdopt2025! pet_adoption -e "SHOW TABLES LIKE 'users';" 2>/dev/null)
       
       if [ -z "$TABLE_CHECK" ]; then
         echo "首次安装，执行数据库迁移..."
         if [ -f /app/migrations/02_create_tables.sql ]; then
-          mysql -h mysql -u pet_user -pPetAdopt2025! pet_adoption < /app/migrations/02_create_tables.sql
+          mysql -h mysql -u root -pPetAdopt2025! pet_adoption < /app/migrations/02_create_tables.sql
           echo "数据库表创建完成！"
         else
           echo "警告: 未找到迁移脚本 /app/migrations/02_create_tables.sql"
@@ -127,8 +128,8 @@ services:
       test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:8080/health || exit 1"]
       interval: 30s
       timeout: 10s
-      retries: 3
-      start_period: 60s
+      retries: 5
+      start_period: 600s
 
   # React 前端 + Nginx
   frontend:
