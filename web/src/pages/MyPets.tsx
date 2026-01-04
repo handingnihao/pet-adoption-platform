@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Plus, Edit, Trash2, EyeOff, Clock, CheckCircle, XCircle } from 'lucide-react'
+import { Plus, Trash2, EyeOff, Clock, CheckCircle, XCircle } from 'lucide-react'
 import { Button } from '../components/ui/button'
 import { Card, CardContent } from '../components/ui/card'
 import { petApi } from '../lib/api'
@@ -126,14 +126,6 @@ export function MyPets() {
                           浏览 {pet.view_count} 次 · {new Date(pet.created_at).toLocaleDateString()}
                         </p>
                         <div className="flex gap-2 mt-3">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => navigate(`/pets/${pet.id}/edit`)}
-                          >
-                            <Edit className="h-3 w-3 mr-1" />
-                            编辑
-                          </Button>
                           <Button
                             size="sm"
                             variant="outline"
