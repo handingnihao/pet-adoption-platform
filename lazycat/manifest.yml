@@ -1,6 +1,6 @@
 package: cloud.lazycat.app.petadoption
 version: 1.0.0
-name: 爱心宠物领养平台
+name: 宠爱有家
 description: >-
   连接宠物救助机构与领养者的综合性在线平台。支持宠物发布、领养申请、
   机构入驻、社区互动、爱心捐赠等功能。让每一只流浪动物都能找到温暖的家。
@@ -9,7 +9,7 @@ homepage: https://github.com/handingnihao/pet-adoption-platform
 
 locales:
   zh:
-    name: 爱心宠物领养平台
+    name: 宠爱有家
     description: 连接宠物救助机构与领养者的综合性在线平台，支持宠物发布、领养申请、社区互动等功能。
   en:
     name: Pet Adoption Platform
@@ -65,7 +65,7 @@ services:
 
   # Go 后端
   backend:
-    image: registry.lazycat.cloud/handingnihao/idocker1688/pet-adoption-backend:b7b4f7f4584b2536
+    image: registry.lazycat.cloud/handingnihao/idocker1688/pet-adoption-backend:abe2f805ca13cc89
     user: root
     depends_on:
       - mysql

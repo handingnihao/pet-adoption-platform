@@ -78,13 +78,26 @@ func (s *UserService) Register(req *model.UserRegisterRequest) (*model.User, err
 		return nil, err
 	}
 
+	// 检查是否是第一个用户 - 如果是，则赋予管理员权限
+	userCount, err := s.userDAO.Count()
+	if err != nil {
+		logger.Error("统计用户数量失败", zap.Error(err))
+		return nil, err
+	}
+	
+	role := model.RoleUser
+	if userCount == 0 {
+		role = model.RoleAdmin
+		logger.Info("首次注册用户，自动授予管理员权限", zap.String("username", req.Username))
+	}
+
 	// 6. 创建用户
 	user := &model.User{
 		Username: req.Username,
 		Password: hashedPassword,
 		Phone:    req.Phone,
 		Email:    req.Email,
-		Role:     model.RoleUser,
+		Role:     role,
 		Status:   model.UserStatusNormal,
 	}
 
@@ -96,7 +109,8 @@ func (s *UserService) Register(req *model.UserRegisterRequest) (*model.User, err
 
 	logger.Info("用户注册成功",
 		zap.Int64("user_id", user.ID),
-		zap.String("username", user.Username))
+		zap.String("username", user.Username),
+		zap.String("role", string(user.Role)))
 
 	return user, nil
 }

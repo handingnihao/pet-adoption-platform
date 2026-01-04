@@ -220,6 +220,15 @@ func (dao *UserDAO) ExistsByEmail(email string) (bool, error) {
 	return count > 0, err
 }
 
+// Count 统计所有用户数量
+func (dao *UserDAO) Count() (int64, error) {
+	var count int64
+	err := dao.db.Model(&model.User{}).
+		Where("deleted_at IS NULL").
+		Count(&count).Error
+	return count, err
+}
+
 // CountByRole 统计指定角色的用户数
 func (dao *UserDAO) CountByRole(role model.UserRole) (int64, error) {
 	var count int64
