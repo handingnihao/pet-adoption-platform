@@ -49,9 +49,6 @@ export function Header() {
         <div className="hidden md:flex items-center space-x-4">
           {isAuthenticated ? (
             <div className="flex items-center space-x-4">
-              <Link to="/favorites" className="text-muted-foreground hover:text-primary">
-                <Heart className="h-5 w-5" />
-              </Link>
               <div className="relative group">
                 <button className="flex items-center space-x-2 text-sm">
                   <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
