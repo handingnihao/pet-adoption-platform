@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
-import { ArrowLeft, MapPin, MessageCircle, CheckCircle, XCircle } from 'lucide-react'
+import { ArrowLeft, MapPin, CheckCircle, XCircle } from 'lucide-react'
 import { Button } from '../components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
 import { petApi } from '../lib/api'
@@ -193,10 +193,6 @@ export function PetDetail() {
           <div className="flex gap-4">
             <Button className="flex-1" size="lg" onClick={handleAdopt}>
               申请领养
-            </Button>
-            <Button variant="outline" size="lg">
-              <MessageCircle className="h-4 w-4 mr-2" />
-              咨询
             </Button>
           </div>
 
