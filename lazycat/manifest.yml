@@ -133,7 +133,7 @@ services:
 
   # React 前端 + Nginx
   frontend:
-    image: registry.lazycat.cloud/handingnihao/idocker1688/pet-adoption-frontend:c56896f3a28ac1c8
+    image: registry.lazycat.cloud/handingnihao/idocker1688/pet-adoption-frontend:9c53a59cb03ac22f
     depends_on:
       - backend
     healthcheck:

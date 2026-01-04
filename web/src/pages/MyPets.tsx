@@ -8,11 +8,18 @@ import { petApi } from '../lib/api'
 import type { Pet } from '../lib/api'
 import { useAuthStore } from '../store/auth'
 
-const statusConfig = {
+const statusConfig: Record<string | number, { label: string; icon: typeof Clock; color: string; bg: string }> = {
+  // 数字状态 (旧版本兼容)
   0: { label: '待审核', icon: Clock, color: 'text-yellow-500', bg: 'bg-yellow-50' },
   1: { label: '已发布', icon: CheckCircle, color: 'text-green-500', bg: 'bg-green-50' },
   2: { label: '已下架', icon: EyeOff, color: 'text-gray-500', bg: 'bg-gray-50' },
   3: { label: '已拒绝', icon: XCircle, color: 'text-red-500', bg: 'bg-red-50' },
+  // 字符串状态 (后端实际返回)
+  'pending': { label: '待审核', icon: Clock, color: 'text-yellow-500', bg: 'bg-yellow-50' },
+  'available': { label: '已发布', icon: CheckCircle, color: 'text-green-500', bg: 'bg-green-50' },
+  'adopted': { label: '已领养', icon: CheckCircle, color: 'text-blue-500', bg: 'bg-blue-50' },
+  'offline': { label: '已下架', icon: EyeOff, color: 'text-gray-500', bg: 'bg-gray-50' },
+  'rejected': { label: '已拒绝', icon: XCircle, color: 'text-red-500', bg: 'bg-red-50' },
 }
 
 export function MyPets() {
@@ -92,8 +99,7 @@ export function MyPets() {
         <>
           <div className="grid md:grid-cols-2 gap-4">
             {pets.map((pet: Pet) => {
-              const statusKey = (typeof pet.status === 'string' ? parseInt(pet.status, 10) : pet.status) as 0 | 1 | 2 | 3
-              const status = statusConfig[statusKey] || statusConfig[0]
+              const status = statusConfig[pet.status] || statusConfig[0]
               const StatusIcon = status.icon
               return (
                 <Card key={pet.id}>
